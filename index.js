@@ -5,14 +5,41 @@
     var _LOCALE_ = 'en',
 
     _TYPES_ = {
+      alpha: /^[a-z]+$/i,
+      alphaDash: /^[a-z0-9_\-]+$/i,
+      alphaNumeric: /^[a-z0-9]+$/i,
+      alphaUnderscore: /^[a-z0-9_]+$/i,
       email: /^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,6}$/i,
       integer: /^\-?[0-9]+$/,
-      url: /^((http|https):\/\/(\w+:{0,1}\w*@)?(\S+)|)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?$/,
       natural: /^[0-9]+$/i,
-      naturalNonZero: /^[1-9][0-9]*$/i
+      naturalNonZero: /^[1-9][0-9]*$/i,
+      url: /^((http|https):\/\/(\w+:{0,1}\w*@)?(\S+)|)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?$/
     },
 
     _VALIDATORS_ = {
+
+      length: function (obj, prop, o, num) {
+        var m = function () {
+          switch (o) {
+            case '>':
+              return 'lengthGreaterThan';
+            case '<':
+              return 'lengthLessThan';
+            case '>=':
+              return 'lengthGreaterThanOrEqualTo';
+            case '<=':
+              return 'lengthLessThanOrEqualTo';
+            case '=':
+              return 'lengthEqualTo';
+          }
+        }();
+        if (!_COMPARE(obp[prop], o, num)) throw __MESSAGE__(m, {property: prop, num: num})
+      },
+
+      match: function (obj, prop, type) {
+        if (!_TYPES_[type].test(obj[prop]))
+          throw _MESSAGE_(type, {property: prop});
+      },
 
       presence: function (obj, prop) {
         if (!obj[prop]) throw _MESSAGE_('presence', {property: prop});
@@ -21,53 +48,38 @@
       operator: function (obj, lh, o, rh) {
         var lhv = obj[lh]
           , rhv = 'string' === typeof rh ? obj[rh] : rh
-          , b, m;
-        switch (o) {
-          case '>':
-            b = lhv > rhv;
-            m = 'greaterThan';
-            break;
-          case '<':
-            b = lhv < rhv;
-            m = 'lessThan';
-            break;
-          case '>=':
-            b = lhv >= rhv;
-            m = 'greaterThanOrEqualTo';
-            break;
-          case '<=':
-            b = lhv <= rhv;
-            m = 'lessThanOrEqualTo';
-            break;
-          case '=':
-            b = lhv == rhv;
-            m = 'equalTo';
-        }
-        if (!b) throw _MESSAGE_(m, {lh: lh, rh: 'string' === typeof rh ? rh : rhv});
-      },
-
-      match: function (obj, prop, type) {
-        if (!_TYPES_[type].test(obj[prop]))
-          throw _MESSAGE_(type, {property: prop});
+          , m;
+        m = function () {
+          switch (o) {
+            case '>':
+              return 'greaterThan';
+            case '<':
+              return 'lessThan';
+            case '>=':
+              return 'greaterThanOrEqualTo';
+            case '<=':
+              return 'lessThanOrEqualTo';
+            case '=':
+              return 'equalTo';
+          }
+        }()
+        if (!_COMPARE_(lhv, o, rhv)) throw _MESSAGE_(m, {lh: lh, rh: 'string' === typeof rh ? rh : rhv});
       }
 
     },
 
     _MESSAGES_ = {
-      presence: {
-        en: '{{property}} is required'
+      alpha: {
+        en: '{{property}} must contain only letters'
       },
-      lessThan: {
-        en: '{{lh}} must be less than {{rh}}'
+      alphaDash: {
+        en: '{{property}} must contain only letters and dashes'
       },
-      greaterThan: {
-        en: '{{lh}} must be greater than {{rh}}'
+      alphaNumeric: {
+        en: '{{property}} must contain only letters and numbers'
       },
-      lessThanOrEqualTo: {
-        en: '{{lh}} must be less than or equal to {{rh}}'
-      },
-      greaterThanOrEqualTo: {
-        en: '{{lh}} must be greater than or equal to {{rh}}'
+      alphaUnderscore: {
+        en: '{{property}} must contain only letters and underscores'
       },
       equalTo: {
         en: '{{lh}} must be equal to {{rh}}'
@@ -75,17 +87,47 @@
       email: {
         en: '{{property}} must be a valid e-mail address'
       },
+      greaterThan: {
+        en: '{{lh}} must be greater than {{rh}}'
+      },
+      greaterThanOrEqualTo: {
+        en: '{{lh}} must be greater than or equal to {{rh}}'
+      },
       integer: {
         en: '{{property}} must be a valid integer'
       },
-      url: {
-        en: '{{property}} must be a valid URL'
+      lengthEqualTo: {
+        en: '{{property}} must have {{num}} character(s)'
+      },
+      lengthGreaterThan: {
+        en: '{{property}} must be greater than {{num}} character(s)'
+      },
+      lengthGreaterThanOrEqualTo: {
+        en: '{{property}} must be greater than or equal to {{num}} character(s)'
+      },
+      lengthLessThan: {
+        en: '{{property}} must be less than {{num}} character(s)'
+      },
+      lengthLessThanOrEqualTo: {
+        en: '{{property}} must be less than or equal to {{num}} character(s)'
+      },
+      lessThan: {
+        en: '{{lh}} must be less than {{rh}}'
+      },
+      lessThanOrEqualTo: {
+        en: '{{lh}} must be less than or equal to {{rh}}'
       },
       natural: {
         en: '{{property}} must be a positive number'
       },
       naturalNonZero: {
         en: '{{property}} must be a positive number and not be zero'
+      }
+      url: {
+        en: '{{property}} must be a valid URL'
+      },
+      presence: {
+        en: '{{property}} is required'
       }
     },
 
@@ -253,6 +295,21 @@
       return message.replace(/\{\{([a-zA-Z]+)\}\}/g, function (match, key) {
         return options[key];
       });
+    }
+
+    function _COMPARE_ (lh, o, rh) {
+      switch (o) {
+        case '>':
+          return lh > rh;
+        case '<':
+          return lh < rh;
+        case '>=':
+          return lh >= rh;
+        case '<=':
+          return lh <= rh;
+        case '='
+          return lh == rh;
+      }
     }
 
     var V = function (rules) {
