@@ -19,32 +19,36 @@
       },
 
       operator: function (obj, lh, o, rh) {
-        var b, m;
-        lh = model[lh];
-        rh = model[rh];
+        var lhv = obj[lh]
+          , rhv = 'string' === typeof rh ? obj[rh] : rh
+          , b, m;
         switch (o) {
           case '>':
-            b = lh > rh;
+            b = lhv > rhv;
             m = 'greaterThan';
+            break;
           case '<':
-            b = lh < rh;
+            b = lhv < rhv;
             m = 'lessThan';
+            break;
           case '>=':
-            b = lh >= rh;
+            b = lhv >= rhv;
             m = 'greaterThanOrEqualTo';
+            break;
           case '<=':
-            b = lh <= rh;
+            b = lhv <= rhv;
             m = 'lessThanOrEqualTo';
+            break;
           case '=':
-            b = lh == rh;
+            b = lhv == rhv;
             m = 'equalTo';
         }
-        if (!b) throw _MESSAGE_(m, {lh: lh, rh: rh});
+        if (!b) throw _MESSAGE_(m, {lh: lh, rh: 'string' === typeof rh ? rh : rhv});
       },
 
       match: function (obj, prop, type) {
-        if (!_TYPES_[type].test(model[prop]))
-          throw _MESSAGES_(type, {property: prop});
+        if (!_TYPES_[type].test(obj[prop]))
+          throw _MESSAGE_(type, {property: prop});
       }
 
     },
@@ -96,7 +100,6 @@
       this._args = args;
       this._ifAll = {};
       this._unlessAll = {};
-      this._catchAll = {};
     };
 
     Validation.prototype = {
@@ -217,7 +220,7 @@
                   if (prop.catch) {
                     error = prop.catch(obj);
                   } else {
-                    if (th.catchAll) throw th.catchAll(obj);
+                    if (th._catchAll) th._catchAll(obj);
                   }
                   errors.push(error);
                 })
@@ -226,10 +229,10 @@
           promise = Promise.all(promises);
         } else {
           args = th._args || []
-          args.unshift(obj, name);
+          args.unshift(obj);
           promise = Promise.method(th._validator).apply(null, args)
             .catch(function(error) {
-              if (th.catchAll) throw th.catchAll(obj);
+              if (th._catchAll) th._catchAll(obj);
               errors.push(error);
             })
         }
@@ -258,7 +261,7 @@
         var rule;
         for (var prop in rules) {
           rule = rules[prop];
-          this.validate(rule).of(prop);
+          this.validateOf(prop, rule);
         }
       }
     }
@@ -266,14 +269,14 @@
     V.prototype = {
 
       validate: function (name) {
-        var args = Array.prototype.splice.call(arguments, 2)
+        var args = Array.prototype.splice.call(arguments, 1)
           , validation = new Validation(name, args);
         this.validations.push(validation);
         return validation;
       },
 
       validateOf: function (props, name) {
-        return this.validate(name).of(props);
+        return this.validate.apply(this, Array.prototype.splice.call(arguments, 1)).of(props);
       },
 
       run: function (obj) {
