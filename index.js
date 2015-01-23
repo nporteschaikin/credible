@@ -1,0 +1,322 @@
+(function(root){
+
+  function __(_, Promise) {
+
+    var _LOCALE_ = 'en',
+
+    _TYPES_ = {
+      email: /^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,6}$/i,
+      integer: /^\-?[0-9]+$/,
+      url: /^((http|https):\/\/(\w+:{0,1}\w*@)?(\S+)|)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?$/,
+      natural: /^[0-9]+$/i,
+      naturalNonZero: /^[1-9][0-9]*$/i
+    },
+
+    _VALIDATORS_ = {
+
+      presence: function (obj, prop) {
+        if (!obj[prop]) throw _MESSAGE_('presence', {property: prop});
+      },
+
+      operator: function (obj, lh, o, rh) {
+        var b, m;
+        lh = model[lh];
+        rh = model[rh];
+        switch (o) {
+          case '>':
+            b = lh > rh;
+            m = 'greaterThan';
+          case '<':
+            b = lh < rh;
+            m = 'lessThan';
+          case '>=':
+            b = lh >= rh;
+            m = 'greaterThanOrEqualTo';
+          case '<=':
+            b = lh <= rh;
+            m = 'lessThanOrEqualTo';
+          case '=':
+            b = lh == rh;
+            m = 'equalTo';
+        }
+        if (!b) throw _MESSAGE_(m, {lh: lh, rh: rh});
+      },
+
+      match: function (obj, prop, type) {
+        if (!_TYPES_[type].test(model[prop]))
+          throw _MESSAGES_(type, {property: prop});
+      }
+
+    },
+
+    _MESSAGES_ = {
+      presence: {
+        en: '{{property}} is required'
+      },
+      lessThan: {
+        en: '{{lh}} must be less than {{rh}}'
+      },
+      greaterThan: {
+        en: '{{lh}} must be greater than {{rh}}'
+      },
+      lessThanOrEqualTo: {
+        en: '{{lh}} must be less than or equal to {{rh}}'
+      },
+      greaterThanOrEqualTo: {
+        en: '{{lh}} must be greater than or equal to {{rh}}'
+      },
+      equalTo: {
+        en: '{{lh}} must be equal to {{rh}}'
+      },
+      email: {
+        en: '{{property}} must be a valid e-mail address'
+      },
+      integer: {
+        en: '{{property}} must be a valid integer'
+      },
+      url: {
+        en: '{{property}} must be a valid URL'
+      },
+      natural: {
+        en: '{{property}} must be a positive number'
+      },
+      naturalNonZero: {
+        en: '{{property}} must be a positive number and not be zero'
+      }
+    },
+
+    Validation = function (name, args) {
+      if ('function' === typeof name) {
+        validator = props;
+      } else {
+        validator = _VALIDATOR_(name);
+      }
+
+      this._validator = validator;
+      this._args = args;
+      this._ifAll = {};
+      this._unlessAll = {};
+      this._catchAll = {};
+    };
+
+    Validation.prototype = {
+
+      if: function () {
+        if (arguments.length == 2) {
+          var props = arguments[0]
+            , fn = arguments[1]
+            , prop;
+          if ('string' === typeof props) props = [props];
+          for (var key in props) {
+            prop = props[key];
+            this.prop(prop, {if: fn});
+          }
+        } else {
+          this._ifAll.push(arguments[0]);
+        }
+        return this;
+      },
+
+      unless: function () {
+        if (arguments.length == 2) {
+          var props = arguments[0]
+            , fn = arguments[1]
+            , prop;
+          if ('string' === typeof props) props = [props];
+          for (var key in props) {
+            prop = props[key];
+            this.prop(prop, {unless: fn});
+          }
+        } else {
+          this._unlessAll.push(arguments[0]);
+        }
+        return this;
+      },
+
+      catch: function () {
+        if (arguments.length == 2) {
+          var props = arguments[0]
+            , fn = arguments[1]
+            , prop;
+          if ('string' === typeof props) props = [props];
+          for (var key in props) {
+            prop = props[key];
+            this.prop(prop, {if: fn});
+          }
+        } else {
+          this._catchAll = arguments[0];
+        }
+        return this;
+      },
+
+      of: function (props, args) {
+        return this.prop(props, args);
+      },
+
+      prop: function (props, args) {
+        args = args || {};
+        if ('string' === typeof props) props = [props]
+
+        var name, prop;
+        for (var key in props) {
+          name = props[key];
+
+          if (!this._props) this._props = {};
+          if (!(prop = this._props[name])) prop = {};
+
+          if (args.if) {
+            if (!prop.if) prop = [];
+            prop.if.push(args.if);
+          }
+          if (args.unless) {
+            if (!prop.unless) unless = [];
+            prop.unless.push(args.unless);
+          }
+          if (args.catch) {
+            prop.catch = args.catch;
+          }
+          this._props[name] = prop;
+        }
+
+        return this;
+      },
+
+      run: function (obj) {
+        var th = this
+          , errors = []
+          , fn
+          , promise;
+        for (var key in this._ifAll) {
+          fn = th._ifAll[key];
+          if (!!!fn(obj)) return th;
+        }
+        for (var key in this._unlessAll) {
+          fn = th._unlessAll[key];
+          if (!!fn(obj)) return th;
+        }
+        if (th._props) {
+          var promises = [], prop;
+          for (name in th._props) {
+            prop = th._props[name], args = th._args || [];
+            promises.push(function(){
+              if (prop.if) {
+                for (var key in prop.if) {
+                  fn = prop.if[key];
+                  if (!!!fn(obj)) return;
+                }
+              }
+              if (prop.unless) {
+                for (var key in prop.unless) {
+                  fn = prop.unless[key];
+                  if (!!fn(obj)) return;
+                }
+              }
+              args.unshift(obj, name);
+              return Promise.method(th._validator).apply(null, args)
+                .catch(function (error){
+                  if (prop.catch) {
+                    error = prop.catch(obj);
+                  } else {
+                    if (th.catchAll) throw th.catchAll(obj);
+                  }
+                  errors.push(error);
+                })
+            }());
+          }
+          promise = Promise.all(promises);
+        } else {
+          args = th._args || []
+          args.unshift(obj, name);
+          promise = Promise.method(th._validator).apply(null, args)
+            .catch(function(error) {
+              if (th.catchAll) throw th.catchAll(obj);
+              errors.push(error);
+            })
+        }
+        return promise.then(function () {
+          if (errors.length) throw errors;
+          return th;
+        });
+      }
+
+    }
+
+    function _VALIDATOR_ (name) {
+      return _VALIDATORS_[name];
+    }
+
+    function _MESSAGE_ (name, options) {
+      var message = _MESSAGES_[name][_LOCALE_]
+      return message.replace(/\{\{([a-zA-Z]+)\}\}/g, function (match, key) {
+        return options[key];
+      });
+    }
+
+    var V = function (rules) {
+      this.validations = [];
+      if (rules) {
+        var rule;
+        for (var prop in rules) {
+          rule = rules[prop];
+          this.validate(rule).of(prop);
+        }
+      }
+    }
+
+    V.prototype = {
+
+      validate: function (name) {
+        var args = Array.prototype.splice.call(arguments, 2)
+          , validation = new Validation(name, args);
+        this.validations.push(validation);
+        return validation;
+      },
+
+      validateOf: function (props, name) {
+        return this.validate(name).of(props);
+      },
+
+      run: function (obj) {
+        var errors = [], th = this;
+        return Promise.map(this.validations, function (validation) {
+          return validation.run(obj)
+            .catch (function (error) {
+              errors.push(error);
+            });
+        }).then(function (){
+          var errs = [];
+          if (errors.length) {
+            var error;
+            for (key in errors) {
+              error = errors[key];
+              if (error instanceof Array) {
+                errs = errs.concat(error);
+              } else {
+                errs.push(error);
+              }
+            }
+            throw errs;
+          }
+          return th;
+        });
+      }
+
+    }
+
+    V.setLocale = function (locale) {
+      _LOCALE_ = locale;
+    }
+
+    return V;
+
+  }
+
+  if (typeof define === 'function' && define.amd) {
+    define(['lodash', 'bluebird'], __);
+  } else if (typeof exports == 'object') {
+    module.exports = __(require('lodash'), require('bluebird'));
+  } else {
+    root.V = __(root._, root.Promise);
+  }
+
+})(this);

@@ -1,0 +1,24 @@
+{
+  "name": "credible",
+  "version": "0.0.1",
+  "author": "Noah Portes Chaikin <noah.porteschaikin@carrotcreative.com>",
+  "description": "Unopinionated validation framework for node and the browser.",
+  "license": "MIT",
+  "keywords": [
+    "validation"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nporteschaikin/credible.git"
+  },
+  "dependencies": {
+    "bluebird": "*",
+    "lodash": "*"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "devDependencies": {
+    "mocha": "1.x"
+  }
+}
