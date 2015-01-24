@@ -227,7 +227,6 @@
       },
 
       prop: function (props, options) {
-        options = options || {};
         if ('string' === typeof props) props = [props]
 
         var name, prop;
@@ -237,16 +236,21 @@
           if (!this._props) this._props = {};
           if (!(prop = this._props[name])) prop = {};
 
-          if (options.if) {
-            if (!prop.if) prop.if = [];
-            prop.if.push(options.if);
-          }
-          if (options.unless) {
-            if (!prop.unless) prop.unless = [];
-            prop.unless.push(options.unless);
-          }
-          if (options.catch) {
-            prop.catch = options.catch;
+          if ('object' === typeof options) {
+            if (options.if) {
+              if (!prop.if) prop.if = [];
+              prop.if.push(options.if);
+              delete options.if;
+            }
+            if (options.unless) {
+              if (!prop.unless) prop.unless = [];
+              prop.unless.push(options.unless);
+              delete options.unless;
+            }
+            if (options.catch) {
+              prop.catch = options.catch;
+              delete options.catch;
+            }
           }
           this._props[name] = prop;
         }
