@@ -19,21 +19,29 @@
     _VALIDATORS_ = {
 
       length: function (obj, prop, o, num) {
-        var m = function () {
-          switch (o) {
-            case '>':
-              return 'lengthGreaterThan';
-            case '<':
-              return 'lengthLessThan';
-            case '>=':
-              return 'lengthGreaterThanOrEqualTo';
-            case '<=':
-              return 'lengthLessThanOrEqualTo';
-            case '=':
-              return 'lengthEqualTo';
-          }
-        }();
-        if (!_COMPARE(obp[prop], o, num)) throw __MESSAGE__(m, {property: prop, num: num})
+        var v = obj[prop].length, b, m;
+        switch (o) {
+          case '>':
+            b = v > num;
+            m = 'lengthGreaterThan';
+            break;
+          case '<':
+            b = v < num;
+            m = 'lengthLessThan';
+            break;
+          case '>=':
+            b = v >= num;
+            m = 'lengthGreaterThanOrEqualTo';
+            break;
+          case '<=':
+            b = v <= num;
+            m = 'lengthLessThanOrEqualTo';
+            break;
+          case '=':
+            b = v == num;
+            m = 'lengthEqualTo';
+        }
+        if (!b) throw _MESSAGE_(m, {property: prop, num: num})
       },
 
       match: function (obj, prop, type) {
@@ -48,22 +56,29 @@
       operator: function (obj, lh, o, rh) {
         var lhv = obj[lh]
           , rhv = 'string' === typeof rh ? obj[rh] : rh
-          , m;
-        m = function () {
-          switch (o) {
-            case '>':
-              return 'greaterThan';
-            case '<':
-              return 'lessThan';
-            case '>=':
-              return 'greaterThanOrEqualTo';
-            case '<=':
-              return 'lessThanOrEqualTo';
-            case '=':
-              return 'equalTo';
-          }
-        }()
-        if (!_COMPARE_(lhv, o, rhv)) throw _MESSAGE_(m, {lh: lh, rh: 'string' === typeof rh ? rh : rhv});
+          , b, m;
+        switch (o) {
+          case '>':
+            b = lhv > rhv;
+            m = 'greaterThan';
+            break;
+          case '<':
+            b = lhv < rhv;
+            m = 'lessThan';
+            break;
+          case '>=':
+            b = lhv >= rhv;
+            m = 'greaterThanOrEqualTo';
+            break;
+          case '<=':
+            b = lhv <= rhv;
+            m = 'lessThanOrEqualTo';
+            break;
+          case '=':
+            b = lhv == rhv;
+            m = 'equalTo';
+        }
+        if (!b) throw _MESSAGE_(m, {lh: lh, rh: 'string' === typeof rh ? rh : rhv});
       }
 
     },
@@ -122,7 +137,7 @@
       },
       naturalNonZero: {
         en: '{{property}} must be a positive number and not be zero'
-      }
+      },
       url: {
         en: '{{property}} must be a valid URL'
       },
@@ -140,8 +155,8 @@
 
       this._validator = validator;
       this._args = args;
-      this._ifAll = {};
-      this._unlessAll = {};
+      this._ifAll = [];
+      this._unlessAll = [];
     };
 
     Validation.prototype = {
@@ -186,7 +201,7 @@
           if ('string' === typeof props) props = [props];
           for (var key in props) {
             prop = props[key];
-            this.prop(prop, {if: fn});
+            this.prop(prop, {catch: fn});
           }
         } else {
           this._catchAll = arguments[0];
@@ -295,21 +310,6 @@
       return message.replace(/\{\{([a-zA-Z]+)\}\}/g, function (match, key) {
         return options[key];
       });
-    }
-
-    function _COMPARE_ (lh, o, rh) {
-      switch (o) {
-        case '>':
-          return lh > rh;
-        case '<':
-          return lh < rh;
-        case '>=':
-          return lh >= rh;
-        case '<=':
-          return lh <= rh;
-        case '='
-          return lh == rh;
-      }
     }
 
     var V = function (rules) {
