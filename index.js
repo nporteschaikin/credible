@@ -18,35 +18,25 @@
 
     _VALIDATORS_ = {
 
-      length: function (obj, prop, o, num) {
-        var v = obj[prop].length, b, m;
-        switch (o) {
-          case '>':
-            b = v > num;
-            m = 'lengthGreaterThan';
-            break;
-          case '<':
-            b = v < num;
-            m = 'lengthLessThan';
-            break;
-          case '>=':
-            b = v >= num;
-            m = 'lengthGreaterThanOrEqualTo';
-            break;
-          case '<=':
-            b = v <= num;
-            m = 'lengthLessThanOrEqualTo';
-            break;
-          case '=':
-            b = v == num;
-            m = 'lengthEqualTo';
+      length: function (obj, prop, options) {
+        var v = obj[prop].length, b, n, m;
+        if (options.greaterThan) {
+          b = v > (n = options.greaterThan);
+          m = 'lengthGreaterThan';
+        } else if (options.lessThan) {
+          b = v < (n = options.lessThan);
+          m = 'lengthLessThan';
+        } else if (options.greaterThanOrEqualTo) {
+          b = v >= (n = options.greaterThanOrEqualTo);
+          m = 'lengthGreaterThanOrEqualTo';
+        } else if (options.lessThanOrEqualTo) {
+          b = v <= (n = options.lessThanOrEqualTo);
+          m = 'lengthLessThanOrEqualTo';
+        } else {
+          b = v == (n = options.equalTo);
+          m = 'lengthEqualTo';
         }
-        if (!b) throw _MESSAGE_(m, {property: prop, num: num})
-      },
-
-      match: function (obj, prop, type) {
-        if (!_TYPES_[type].test(obj[prop]))
-          throw _MESSAGE_(type, {property: prop});
+        if (!b) throw _MESSAGE_(m, {property: prop, num: n})
       },
 
       presence: function (obj, prop) {
@@ -57,33 +47,41 @@
         var lhv = obj[lh]
           , rhv = 'string' === typeof rh ? obj[rh] : rh
           , b, m;
-        switch (o) {
-          case '>':
-            b = lhv > rhv;
-            m = 'greaterThan';
-            break;
-          case '<':
-            b = lhv < rhv;
-            m = 'lessThan';
-            break;
-          case '>=':
-            b = lhv >= rhv;
-            m = 'greaterThanOrEqualTo';
-            break;
-          case '<=':
-            b = lhv <= rhv;
-            m = 'lessThanOrEqualTo';
-            break;
-          case '=':
-            b = lhv == rhv;
-            m = 'equalTo';
+        if (options.greaterThan) {
+          b = lhv > rhv;
+          m = 'greaterThan';
+        } else if (options.lessThan) {
+          b = lhv < rhv;
+          m = 'lessThan';
+        } else if (options.greaterThanOrEqualTo) {
+          b = lhv >= rhv;
+          m = 'greaterThanOrEqualTo';
+        } else if (options.lessThanOrEqualTo) {
+          b = lhv <= rhv;
+          m = 'lessThanOrEqualTo';
+        } else {
+          b = lhv == rhv;
+          m = 'equalTo';
         }
         if (!b) throw _MESSAGE_(m, {lh: lh, rh: 'string' === typeof rh ? rh : rhv});
       }
 
     },
 
-    _MESSAGES_ = {
+    _MATCH_ = function (obj, prop, type) {
+      if (!_TYPES_[type].test(obj[prop]))
+        throw _MESSAGE_(type, {property: prop});
+    }
+
+    for (var type in _TYPES_) {
+      _VALIDATORS_[type] = function (obj, prop, bool) {
+        if (bool) {
+          _MATCH_(obj, prop, type);
+        }
+      }
+    }
+
+    var _MESSAGES_ = {
       alpha: {
         en: '{{property}} must contain only letters'
       },
@@ -146,7 +144,7 @@
       }
     },
 
-    Validation = function (name, args) {
+    Validation = function (name, options) {
       if ('function' === typeof name) {
         validator = props;
       } else {
@@ -154,9 +152,24 @@
       }
 
       this._validator = validator;
-      this._args = args;
+      this._options = options;
       this._ifAll = [];
       this._unlessAll = [];
+
+      if ('object' === typeof options) {
+        if (options.if) {
+          this.if(options.if);
+          delete options.if;
+        }
+        if (options.unless) {
+          this.unless(options.unless);
+          delete options.unless;
+        }
+        if (options.catch) {
+          this.catch(options.catch);
+          delete options.catch;
+        }
+      }
     };
 
     Validation.prototype = {
@@ -209,12 +222,12 @@
         return this;
       },
 
-      of: function (props, args) {
-        return this.prop(props, args);
+      of: function (props, options) {
+        return this.prop(props, options);
       },
 
-      prop: function (props, args) {
-        args = args || {};
+      prop: function (props, options) {
+        options = options || {};
         if ('string' === typeof props) props = [props]
 
         var name, prop;
@@ -224,16 +237,16 @@
           if (!this._props) this._props = {};
           if (!(prop = this._props[name])) prop = {};
 
-          if (args.if) {
-            if (!prop.if) prop = [];
-            prop.if.push(args.if);
+          if (options.if) {
+            if (!prop.if) prop.if = [];
+            prop.if.push(options.if);
           }
-          if (args.unless) {
-            if (!prop.unless) unless = [];
-            prop.unless.push(args.unless);
+          if (options.unless) {
+            if (!prop.unless) prop.unless = [];
+            prop.unless.push(options.unless);
           }
-          if (args.catch) {
-            prop.catch = args.catch;
+          if (options.catch) {
+            prop.catch = options.catch;
           }
           this._props[name] = prop;
         }
@@ -244,6 +257,7 @@
       run: function (obj) {
         var th = this
           , errors = []
+          , options = th._options || {}
           , fn
           , promise;
         for (var key in this._ifAll) {
@@ -257,7 +271,7 @@
         if (th._props) {
           var promises = [], prop;
           for (name in th._props) {
-            prop = th._props[name], args = th._args || [];
+            prop = th._props[name];
             promises.push(function(){
               if (prop.if) {
                 for (var key in prop.if) {
@@ -271,8 +285,7 @@
                   if (!!fn(obj)) return;
                 }
               }
-              args.unshift(obj, name);
-              return Promise.method(th._validator).apply(null, args)
+              return Promise.method(th._validator)(obj, name, th._options)
                 .catch(function (error){
                   if (prop.catch) {
                     error = prop.catch(obj);
@@ -285,9 +298,7 @@
           }
           promise = Promise.all(promises);
         } else {
-          args = th._args || []
-          args.unshift(obj);
-          promise = Promise.method(th._validator).apply(null, args)
+          promise = Promise.method(th._validator)(obj, th._options)
             .catch(function(error) {
               if (th._catchAll) th._catchAll(obj);
               errors.push(error);
@@ -297,6 +308,50 @@
           if (errors.length) throw errors;
           return th;
         });
+      }
+
+    }
+
+    function PropertyValidation (props) {
+      if ('string' === typeof props) props = [props];
+      this.props = props;
+      this.validations = {};
+    }
+
+    PropertyValidation.prototype = {
+
+      rule: function (name, options) {
+        var validation = (new Validation(name, options))
+          .of(this.props);
+        this.validations[name] = validation;
+        return this;
+      },
+
+      if: function () {
+        var validation;
+        for (var key in this.validations) {
+          validation = this.validations[key];
+          validation.if.apply(validation, arguments);
+        }
+        return this;
+      },
+
+      unless: function () {
+        var validation;
+        for (var key in this.validations) {
+          validation = this.validations[key];
+          validation.unless.apply(validation, arguments);
+        }
+        return this;
+      },
+
+      catch: function () {
+        var validation;
+        for (var key in this.validations) {
+          validation = this.validations[key];
+          validation.catch.apply(validation, arguments);
+        }
+        return this;
       }
 
     }
@@ -312,33 +367,50 @@
       });
     }
 
-    var V = function (rules) {
+    var V = function (props) {
       this.validations = [];
-      if (rules) {
-        var rule;
-        for (var prop in rules) {
-          rule = rules[prop];
-          this.validateOf(prop, rule);
+      this.propertyValidations = [];
+      if (props) {
+        var rules, propertyValidation, options;
+        for (var prop in props) {
+          propertyValidation = this.validateOf(prop);
+          rules = props[prop];
+          for (var rule in rules) {
+            options = rules[rule];
+            propertyValidation.rule(rule, options);
+          }
         }
       }
     }
 
     V.prototype = {
 
-      validate: function (name) {
-        var args = Array.prototype.splice.call(arguments, 1)
-          , validation = new Validation(name, args);
+      validate: function (name, options) {
+        var validation = new Validation(name, options);
         this.validations.push(validation);
         return validation;
       },
 
-      validateOf: function (props, name) {
-        return this.validate.apply(this, Array.prototype.splice.call(arguments, 1)).of(props);
+      validateOf: function (props) {
+        var propertyValidation = new PropertyValidation(props);
+        this.propertyValidations.push(propertyValidation);
+        return propertyValidation;
       },
 
       run: function (obj) {
-        var errors = [], th = this;
-        return Promise.map(this.validations, function (validation) {
+        var errors = []
+          , th = this
+          , validations = th.validations
+          , propertyValidation;
+
+        for (var key in this.propertyValidations) {
+          propertyValidation = this.propertyValidations[key];
+          for (var k in propertyValidation.validations) {
+            validations.push(propertyValidation.validations[k]);
+          }
+        }
+
+        return Promise.map(validations, function (validation) {
           return validation.run(obj)
             .catch (function (error) {
               errors.push(error);
