@@ -12,8 +12,7 @@
     "url": "https://github.com/nporteschaikin/credible.git"
   },
   "dependencies": {
-    "bluebird": "*",
-    "lodash": "*"
+    "bluebird": "*"
   },
   "scripts": {
     "test": "mocha"
