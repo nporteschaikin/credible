@@ -5,10 +5,7 @@ Credible is a library for validating objects in node.js or the browser.  While i
 
 ## Installation
 
-Credible has two dependencies:
-
-- [underscore.js](http://underscorejs.org) or [lodash](http://lodash.com/)
-- An A+ promise library, a la [bluebird](https://github.com/petkaantonov/bluebird) or [when.js](https://github.com/cujojs/when)
+Credible has one dependency: An A+ promise library, (i.e. [bluebird](https://github.com/petkaantonov/bluebird) or [when.js](https://github.com/cujojs/when))
 
 ### Node.js
 
@@ -19,7 +16,6 @@ $ npm install credible --save
 ### Browser
 
 ```html
-<script src="/lodash.js"></script>
 <script src="/bluebird.js"></script>
 <script src="/credible.js"></script>
 ```
@@ -28,18 +24,26 @@ $ npm install credible --save
 
 ```javascript
 var person = {
-  firstName: 'Noah',
+  firstName: '',
   lastName: 'Portes Chaikin'
+  email: 'foo'
 }
 
 var credible = new Credible({
-  firstName: 'alpha'
-  lastName: 'alpha'
+  firstName: {
+    presence: true
+  },
+  lastName: {
+    presence: true
+  },
+  email: {
+    email: true
+  }
 });
 
 credible.run(person)
   .catch(function(err) {
-    console.log(err);
+    console.log(err); // [ 'firstName is required', 'email must be a valid e-mail address' ]
   })
 
 ```
@@ -47,36 +51,45 @@ credible.run(person)
 ### API
 
 ```javascript
-var rulesObject = {
-  username: 'alpha',
-  email: ['presence', 'email']
-}
-
-new Credible(rulesObject);
+var validator = new Credible();
 ```
 
 The most straightforward and "built to order" way to get started is by passing an object to the Credible constructor with the properties you'd like to validate and the rules you'd like to validate the property against.
 
-Rules can either reference a native validator or be a function:
-
 ```javascript
-var rulesObject = {
-  username: 'alpha',
-  email: function (model, attribute) {
-    if (!email) throw 'No e-mail provided'
-  }
-}
-
-new Credible(rulesObject);
+validator.rule()
 ```
 
-`Credible.validate()` returns a chainable object.
+A variadic function.
 
 ```javascript
-var credible = new Credible()
-credible.validate('');
+validator
+  .rule(properties, rule, options)
+  .rule(properties, { rule1: options, rule2: options })
+  .rule({ property: { rule1: options, rule2: options }, property2: { rule1: options, rule2: options } })
+  .rule(fn)
 ```
 
-### To Do
-- [ ] Write tests
-- [ ] Finish this documentation
+All rules have `if`, `unless`, and `catch` options -- pass functions.
+
+```javascript
+validator
+  .if([properties], fn);
+  .unless([properties], fn);
+  .catch([properties], fn);
+```
+
+| Name  | Description | Options
+| ------------- | ------------- |
+| length | |
+| presence | |
+| operator | |
+| alpha | |
+| alphaDash | |
+| alphaNumeric | |
+| alphaUnderscore | |
+| email | |
+| integer | |
+| natural | |
+| naturalNonZero | |
+| url | |
