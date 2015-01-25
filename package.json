@@ -18,6 +18,7 @@
     "test": "mocha"
   },
   "devDependencies": {
-    "mocha": "1.x"
+    "mocha": "1.x",
+    "should": "^4.6.1"
   }
 }

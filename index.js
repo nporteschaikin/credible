@@ -2,7 +2,7 @@
 
   function __(Promise) {
 
-    _TYPES_ = {
+    ValidatorTypes = {
       alpha: /^[a-z]+$/i,
       alphaDash: /^[a-z0-9_\-]+$/i,
       alphaNumeric: /^[a-z0-9]+$/i,
@@ -14,7 +14,7 @@
       url: /^((http|https):\/\/(\w+:{0,1}\w*@)?(\S+)|)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?$/
     },
 
-    _VALIDATORS_ = {
+    Validators = {
 
       length: function (obj, prop, options) {
         var v = obj[prop].length, b, n, m;
@@ -34,11 +34,11 @@
           b = v == (n = options.equalTo);
           m = 'lengthEqualTo';
         }
-        if (!b) throw _MESSAGE_(m, {property: prop, num: n})
+        if (!b) throw new ValidatorMessage(m, {property: prop, num: n});
       },
 
       presence: function (obj, prop) {
-        if (!obj[prop]) throw _MESSAGE_('presence', {property: prop});
+        if (!obj[prop]) throw new ValidatorMessage('presence', {property: prop});
       },
 
       operator: function (obj, prop, options) {
@@ -61,25 +61,25 @@
           b = lhv == rhv;
           m = 'equalTo';
         }
-        if (!b) throw _MESSAGE_(m, {lh: lh, rh: 'string' === typeof rh ? rh : rhv});
+        if (!b) throw new ValidatorMessage(m, {lh: lh, rh: 'string' === typeof rh ? rh : rhv});
       }
 
     },
 
-    _MATCH_ = function (obj, prop, type) {
-      if (!_TYPES_[type].test(obj[prop]))
-        throw _MESSAGE_(type, {property: prop});
+    ValidationMatch = function (obj, prop, type) {
+      if (!ValidatorTypes[type].test(obj[prop]))
+        throw new ValidatorMessage(type, {property: prop});
     }
 
-    for (var type in _TYPES_) {
-      _VALIDATORS_[type] = (function (t) {
+    for (var type in ValidatorTypes) {
+      Validators[type] = (function (t) {
         return function (obj, prop) {
-          _MATCH_(obj, prop, t);
+          ValidationMatch(obj, prop, t);
         }
       })(type);
     }
 
-    var _MESSAGES_ = {
+    var ValidatorMessages = {
       alpha: {
         en: '{{property}} must contain only letters'
       },
@@ -142,11 +142,9 @@
       }
     },
 
-    Validation = function (name, options) {
-      if ('function' === typeof name) {
-        validator = name;
-      } else {
-        validator = _VALIDATOR_(name);
+    Validation = function (validator, options) {
+      if ('string' === typeof validator) {
+        validator = Validators[validator];
       }
 
       this._validator = validator;
@@ -171,22 +169,6 @@
     };
 
     Validation.prototype = {
-
-      if: function () {
-        if (arguments.length == 2) {
-          var props = arguments[0]
-            , fn = arguments[1]
-            , prop;
-          if ('string' === typeof props) props = [props];
-          for (var key in props) {
-            prop = this._props[prop[key]];
-            if (this._props[prop]) this._props[prop].if = fn;
-          }
-        } else {
-          this._ifAll.push(arguments[0]);
-        }
-        return this;
-      },
 
       if: function () {
         if (arguments.length == 2) {
@@ -303,22 +285,38 @@
                 }
               }
               return Promise.method(th._validator)(obj, name, th._options)
-                .catch(function (error){
-                  if (prop.catch) {
-                    error = prop.catch(obj);
-                  } else {
-                    if (th._catchAll) th._catchAll(obj);
+                .catch(function (name) {
+                  return function (error){
+                    if (prop.catch) {
+                      try {
+                        prop.catch(obj);
+                      } catch (e) {
+                        error = e;
+                      }
+                    } else if (th._catchAll) {
+                      try {
+                        th._catchAll(obj);
+                      } catch (e) {
+                        error = e;
+                      }
+                    }
+                    errors.push(new ValidationError(error, name));
                   }
-                  errors.push(error);
-                })
+                }(name))
             }());
           }
           promise = Promise.all(promises);
         } else {
           promise = Promise.method(th._validator)(obj, th._options)
             .catch(function(error) {
-              if (th._catchAll) th._catchAll(obj);
-              errors.push(error);
+              if (th._catchAll) {
+                try {
+                  th._catchAll(obj);
+                } catch (e) {
+                  error = e;
+                }
+              }
+              errors.push(new ValidationError(error));
             })
         }
         return promise.then(function () {
@@ -329,19 +327,72 @@
 
     }
 
-    function _VALIDATOR_ (name) {
-      return _VALIDATORS_[name];
+    function ValidatorMessage (name, options) {
+      this.name = name;
+      this.options = options;
     }
 
-    function _MESSAGE_ (name, options) {
-      var message = _MESSAGES_[name][V.locale]
-      return message.replace(/\{\{([a-zA-Z]+)\}\}/g, function (match, key) {
-        return options[key];
-      });
+    ValidatorMessage.prototype = {
+
+      toString: function () {
+        var th = this
+          , message = ValidatorMessages[th.name][V.locale];
+        return message.replace(/\{\{([a-zA-Z]+)\}\}/g, function (match, key) {
+          return th.options[key];
+        });
+      }
+
+    }
+
+    var ValidationError = function (error, prop) {
+      this.error = error;
+      this.prop = prop;
+    }
+
+    ValidationError.prototype = {
+
+      toString: function () {
+        return this.error.toString();
+      }
+
+    }
+
+    var ValidationErrors = function (errors, obj) {
+      this.errors = errors;
+      this.obj = obj;
+    }
+
+    ValidationErrors.prototype = {
+
+      toString: function () {
+        var strings = [], error;
+        for (var key in this.errors) {
+          error = this.errors[key];
+          strings.push(error.toString());
+        }
+        return strings.join(', ');
+      },
+
+      toJSON: function () {
+        var obj = {}, error, prop;
+        for (var key in this.errors) {
+          error = this.errors[key];
+          if (prop = error.prop) {
+            if (!obj[prop]) obj[prop] = [];
+            obj[prop].push(error.toString());
+          } else {
+            if (!obj.base) obj.base = [];
+            obj.base.push(error.toString());
+          }
+        }
+        return obj;
+      }
+
     }
 
     var V = function () {
       this.validations = [];
+      this.propCatches = {};
       if (arguments[0]) this.rule.apply(this, arguments);
     }
 
@@ -398,10 +449,17 @@
       },
 
       catch: function () {
-        var validation;
-        for (var key in this.validations) {
-          validation = this.validations[key];
-          validation.catch.apply(validation, arguments);
+        var fn, props, prop;
+        if (arguments.length == 2) {
+          props = arguments[0];
+          fn = arguments[1];
+          if ('string' === typeof props) props = [props];
+          for (var key in props) {
+            prop = props[key];
+            this.propCatches[prop] = fn;
+          }
+        } else {
+          this._catch = fn;
         }
         return this;
       },
@@ -413,21 +471,35 @@
         return Promise.map(th.validations, function (validation) {
           return validation.run(obj)
             .catch (function (error) {
-              errors.push(error);
+              if (error instanceof Array) {
+                errors = errors.concat(error);
+              } else {
+                errors.push(error);
+              }
             });
         }).then(function (){
-          var errs = [];
           if (errors.length) {
-            var error;
-            for (key in errors) {
-              error = errors[key];
-              if (error instanceof Array) {
-                errs = errs.concat(error);
-              } else {
-                errs.push(error);
+            if (th._catch) {
+              try {
+                th._catch(name);
+              } catch (e) {
+                errors.push(e);
               }
+            } else {
+              for (var name in th.propCatches) {
+                for (var key in errors) {
+                  error = errors[key];
+                  if (name == error.prop) errors.splice(key, 1);
+                }
+                try {
+                  th.propCatches[name](obj);
+                } catch (e) {
+                  errors.push(e);
+                }
+              }
+
             }
-            throw errs;
+            throw new ValidationErrors(errors, obj);
           }
           return th;
         });
