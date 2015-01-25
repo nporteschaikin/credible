@@ -1,6 +1,8 @@
 credible
 ========
 
+[![Build Status](https://travis-ci.org/nporteschaikin/credible.svg)](https://travis-ci.org/nporteschaikin/credible)
+
 Credible is a library for validating objects in node.js or the browser.  While it provides several validators out of the box, credible is very _unopinionated_; mostly, credible simply provides a framework for object validation.
 
 ## Installation
