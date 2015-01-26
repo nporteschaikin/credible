@@ -9,89 +9,221 @@ Credible is a library for validating objects in node.js or the browser.  While i
 
 Credible has one dependency: An A+ promise library, (i.e. [bluebird](https://github.com/petkaantonov/bluebird) or [when.js](https://github.com/cujojs/when))
 
-### Node.js
+#### Node.js
 
 ```sh
 $ npm install credible --save
 ```
 
-### Browser
+#### Browser
 
 ```html
 <script src="/bluebird.js"></script>
 <script src="/credible.js"></script>
 ```
 
-### Example
+## Usage
 
 ```javascript
-var person = {
-  firstName: '',
-  lastName: 'Portes Chaikin'
-  email: 'foo'
-}
-
-var credible = new Credible({
-  firstName: {
-    presence: true
-  },
-  lastName: {
+var rules = {
+  name: {
     presence: true
   },
   email: {
     email: true
   }
-});
+}
 
-credible.run(person)
-  .catch(function(err) {
-    console.log(err); // [ 'firstName is required', 'email must be a valid e-mail address' ]
+var obj = {
+  name: 'Noah Portes Chaikin',
+  email: 'noah.porteschaikin@carrotcreative.com'
+}
+
+var credible = new Credible(rules)
+  .run(obj)
+  .catch(function (errors) {
+    console.log(errors.toJSON());
   })
-
 ```
 
-### API
+#### API
+
+##### `new Credible(arguments..)`
+
+The main `Credible` constructor _optionally_ accepts the same arguments as `credible.rule()` (see below).
+
+##### `credible.rule(arguments..)`
+
+Used to set new rules.  `credible.rule()` is a variadic function; it accepts any of the following sets of arguments:
 
 ```javascript
-var validator = new Credible();
+credible
+  .rule(property, validator, options)
+  .rule(property, { validator1: options, validator2: options })
+  .rule(validator, options)
 ```
 
-The most straightforward and "built to order" way to get started is by passing an object to the Credible constructor with the properties you'd like to validate and the rules you'd like to validate the property against.
+`validator` is either an [available validator](#available-validators) or a function. To use an available validator, simply pass the validator's name as a string or an object key:
 
 ```javascript
-validator.rule()
+credible
+  .rule('name', 'presence', true)
+  .rule('name', { length: { greaterThan: 5 } })
+  .rule({ email: { email: { if: function (obj) { return obj.email; } } } })
 ```
 
-A variadic function.
+On validation, a validator function is passed the object, the property key (if provided), and options.  Validator functions can return promises for asynchronous validation. This is an example validator:
 
 ```javascript
-validator
-  .rule(properties, rule, options)
-  .rule(properties, { rule1: options, rule2: options })
-  .rule({ property: { rule1: options, rule2: options }, property2: { rule1: options, rule2: options } })
-  .rule(fn)
+var emailValidator = function (object, property, options) {
+  if ( /^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,6}$/i.test(object[property])) {
+    throw property + ' is an invalid e-mail address';
+  }
+}
 ```
 
-All rules have `if`, `unless`, and `invalid` options -- pass functions.
+Validators can be sent any number of settings in the `options` object; the following options are made available to every validator and are handled by the `credible` object:
+
+| Key | Description |
+| --- | ----------- |
+| `if: fn` | Only validate if `fn` returns `true`. `fn` is a function; the object being validated is passed to `fn` as an argument. |
+| `unless: fn` | Only validate if `fn` returns `false`. `fn` is a function; the object being validated is passed to `fn` as an argument. |
+| `invalid: fn` | `fn` is a function to handle a failed validation; the object being validated is passed to `fn` as an argument. |
+
+##### `credible.if([property], fn)`
+
+Only run validator if `fn` (a function) returns `true`.  `fn` is passed the object being validated.  Optionally, passing `property` will only execute the test on validators executed on the specified property.
 
 ```javascript
-validator
-  .if([properties], fn);
-  .unless([properties], fn);
-  .invalid([properties], fn);
+credible
+  .if(function (object) {
+    return object.foo == 'bar';
+  });
+
+credible
+  .if('name', function (object) {
+    return object.foo == 'bar';
+  });
 ```
 
-| Name  | Description | Options
-| ------------- | ------------- |
-| length | |
-| presence | |
-| operator | |
-| alpha | |
-| alphaDash | |
-| alphaNumeric | |
-| alphaUnderscore | |
-| email | |
-| integer | |
-| natural | |
-| naturalNonZero | |
-| url | |
+##### `credible.unless([property], fn)`
+
+Only run validator if `fn` (a function) returns `false`.  `fn` is passed the object being validated.  Optionally, passing `property` will only execute the test on validators executed on the specified property.
+
+```javascript
+credible
+  .unless(function (object) {
+    return object.foo == 'bar';
+  });
+
+credible
+  .unless('name', function (object) {
+    return object.foo == 'bar';
+  });
+```
+
+##### `credible.invalid([property], fn)`
+
+Pass `fn`, a function, for handling a failed validation. `fn` is passed the object being validated.  Optionally, passing `property` will only execute the function for failed validations executed on the specified property.
+
+```javascript
+credible
+  .invalid(function (object) {
+    throw 'This object is invalid.';
+  });
+
+credible
+  .invalid('name', function (object) {
+    throw 'This name is invalid.';
+  });
+```
+
+##### `credible.run(object)`
+
+Run validations on `object`; returns a promise.
+
+```javascript
+credible
+  .run(obj)
+  .then(function () {
+    console.log('It\'s valid!');
+  })
+  .catch(function (errors) {
+    console.log(errors.toJSON());
+  })
+```
+
+## Available Validators
+
+#### `length`
+
+Property must have a length matching specifications set in `options`.
+
+##### Options
+
+| Key | Description |
+| --- | ----------- |
+| `greaterThan: number` | Property must have a length greater than `number` |
+| `lessThan: number` | Property must have a length greater than `number` |
+| `greaterThanOrEqualTo: number` | Property must have a length greater than `number` |
+| `lessThanOrEqualTo: number` | Property must have a length greater than `number` |
+| `equalTo: number` | Property must have a length equal to `number` |
+
+#### `presence`
+
+Property must be defined and not empty.
+
+#### `operator`
+
+Compare property to a number or another property set in `options`.
+
+##### Options
+
+| Key | Description |
+| --- | ----------- |
+| `greaterThan: numberOrProperty` | Property must have a length greater than `numberOrProperty` |
+| `lessThan: numberOrProperty` | Property must have a length greater than `numberOrProperty` |
+| `greaterThanOrEqualTo: numberOrProperty` | Property must have a length greater than `numberOrProperty` |
+| `lessThanOrEqualTo: numberOrProperty` | Property must have a length greater than `numberOrProperty` |
+| `equalTo: numberOrProperty` | Property must have a length equal to `numberOrProperty` |
+
+#### `alpha`
+
+Property must contain only letters.
+
+#### `alphaDash`
+
+Property must contain only letters and dashes.
+
+#### `alphaNumeric`
+
+Property must contain only letters and numbers.
+
+#### `alphaUnderscore`
+
+Property must contain only letters and underscores.
+
+#### `email`
+
+Property must be a valid e-mail address.
+
+#### `integer`
+
+Property must be an integer.
+
+#### `natural`
+
+Property must be a positive number.
+
+#### `naturalNonZero`
+
+Property must be a positive number greater than zero.
+
+#### `url`
+
+Property must be a valid URL.
+
+## License & Contributing
+
+- Details on the license [can be found here](LICENSE)
+- Details on running tests and contributing [can be found here](CONTRIBUTING.md)
