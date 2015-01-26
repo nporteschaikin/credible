@@ -255,7 +255,7 @@
 
       run: function (obj) {
         var th = this
-          , errors = []
+          , _errors = []
           , options = th._options || {}
           , fn
           , promise;
@@ -285,42 +285,38 @@
                 }
               }
               return Promise.method(th._validator)(obj, name, th._options)
-                .catch(function (name) {
+                .catch(function (name, prop) {
                   return function (error){
                     if (prop.catch) {
                       try {
                         prop.catch(obj);
                       } catch (e) {
-                        error = e;
-                      }
-                    } else if (th._catchAll) {
-                      try {
-                        th._catchAll(obj);
-                      } catch (e) {
-                        error = e;
+                        _errors = e;
                       }
                     }
-                    errors.push(new ValidationError(error, name));
+                    _errors.push(new ValidationError(error, name));
                   }
-                }(name))
+                }(name, prop))
             }());
           }
           promise = Promise.all(promises);
         } else {
           promise = Promise.method(th._validator)(obj, th._options)
             .catch(function(error) {
-              if (th._catchAll) {
-                try {
-                  th._catchAll(obj);
-                } catch (e) {
-                  error = e;
-                }
-              }
-              errors.push(new ValidationError(error));
+              _errors.push(new ValidationError(error));
             })
         }
         return promise.then(function () {
-          if (errors.length) throw errors;
+          if (_errors.length) {
+            if (th._catchAll) {
+              try {
+                th._catchAll(obj);
+              } catch (e) {
+                _errors = e;
+              }
+            }
+            throw _errors;
+          }
           return th;
         });
       }
@@ -459,6 +455,7 @@
             this.propCatches[prop] = fn;
           }
         } else {
+          fn = arguments[0];
           this._catch = fn;
         }
         return this;
@@ -483,7 +480,7 @@
               try {
                 th._catch(name);
               } catch (e) {
-                errors.push(e);
+                errors = [e];
               }
             } else {
               for (var name in th.propCatches) {
