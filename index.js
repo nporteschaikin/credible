@@ -168,9 +168,9 @@
           this.unless(options.unless);
           delete options.unless;
         }
-        if (options.catch) {
-          this.catch(options.catch);
-          delete options.catch;
+        if (options.invalid) {
+          this.invalid(options.invalid);
+          delete options.invalid;
         }
       }
     };
@@ -213,19 +213,19 @@
         return this;
       },
 
-      catch: function () {
+      invalid: function () {
         if (arguments.length == 2) {
           var props = arguments[0], fn = arguments[1], prop;
           if ('string' == typeof props) props = [props];
           for (var key in props) {
             prop = (this._props || {})[props[key]];
             if (prop) {
-              prop.catch = fn;
+              prop.invalid = fn;
               this._props[props[key]] = prop;
             }
           }
         } else {
-          this._catchAll = arguments[0];
+          this._invalidAll = arguments[0];
         }
         return this;
       },
@@ -249,9 +249,9 @@
               this.unless(name, options.unless);
               delete options.unless;
             }
-            if (options.catch) {
-              this.catch(name, options.catch);
-              delete options.catch;
+            if (options.invalid) {
+              this.invalid(name, options.invalid);
+              delete options.invalid;
             }
           }
 
@@ -294,9 +294,9 @@
               return Promise.method(th._validator)(obj, name, th._options)
                 .catch(function (name, prop) {
                   return function (error){
-                    if (prop.catch) {
+                    if (prop.invalid) {
                       try {
-                        prop.catch(obj);
+                        prop.invalid(obj);
                       } catch (e) {
                         error = e;
                       }
@@ -316,9 +316,9 @@
         return promise.then(function () {
           var errs = [], error;
           if (_errors.length) {
-            if (th._catchAll) {
+            if (th._invalidAll) {
               try {
-                th._catchAll(obj);
+                th._invalidAll(obj);
               } catch (e) {
                 _errors = [e];
               }
@@ -403,7 +403,7 @@
 
     var V = function () {
       this.validations = [];
-      this.propCatches = {};
+      this.propInvalids = {};
       if (arguments[0]) this.rule.apply(this, arguments);
     }
 
@@ -459,7 +459,7 @@
         return this;
       },
 
-      catch: function () {
+      invalid: function () {
         var fn, props, prop;
         if (arguments.length == 2) {
           props = arguments[0];
@@ -467,11 +467,11 @@
           if ('string' === typeof props) props = [props];
           for (var key in props) {
             prop = props[key];
-            this.propCatches[prop] = fn;
+            this.propInvalids[prop] = fn;
           }
         } else {
           fn = arguments[0];
-          this._catch = fn;
+          this._invalid = fn;
         }
         return this;
       },
@@ -491,20 +491,20 @@
             });
         }).then(function (){
           if (errors.length) {
-            if (th._catch) {
+            if (th._invalid) {
               try {
-                th._catch(name);
+                th._invalid(name);
               } catch (e) {
                 errors = [e];
               }
             } else {
-              for (var name in th.propCatches) {
+              for (var name in th.propInvalids) {
                 for (var key in errors) {
                   error = errors[key];
                   if (name == error.prop) errors.splice(key, 1);
                 }
                 try {
-                  th.propCatches[name](obj);
+                  th.propInvalids[name](obj);
                 } catch (e) {
                   errors.push(e);
                 }

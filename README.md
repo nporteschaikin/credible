@@ -72,13 +72,13 @@ validator
   .rule(fn)
 ```
 
-All rules have `if`, `unless`, and `catch` options -- pass functions.
+All rules have `if`, `unless`, and `invalid` options -- pass functions.
 
 ```javascript
 validator
   .if([properties], fn);
   .unless([properties], fn);
-  .catch([properties], fn);
+  .invalid([properties], fn);
 ```
 
 | Name  | Description | Options
