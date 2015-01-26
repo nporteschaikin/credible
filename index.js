@@ -518,7 +518,7 @@
   } else if ('object' === typeof exports) {
     module.exports = __(require('bluebird'));
   } else {
-    root.V = __(root.Promise);
+    root.Credible = __(root.Promise);
   }
 
 })(this);
