@@ -4,9 +4,9 @@
 
     ValidatorTypes = {
       alpha: /^[a-z]+$/i,
-      alphaDash: /^[a-z0-9_\-]+$/i,
       alphaNumeric: /^[a-z0-9]+$/i,
-      alphaUnderscore: /^[a-z0-9_]+$/i,
+      alphaNumericDash: /^[a-z0-9_\-]+$/i,
+      alphaNumericUnderscore: /^[a-z0-9_]+$/i,
       email: /^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,6}$/i,
       integer: /^\-?[0-9]+$/,
       natural: /^[0-9]+$/i,
@@ -90,14 +90,14 @@
       alpha: {
         en: '{{property}} must contain only letters'
       },
-      alphaDash: {
-        en: '{{property}} must contain only letters and dashes'
-      },
       alphaNumeric: {
         en: '{{property}} must contain only letters and numbers'
       },
-      alphaUnderscore: {
-        en: '{{property}} must contain only letters and underscores'
+      alphaNumericDash: {
+        en: '{{property}} must contain only letters, numbers, and dashes'
+      },
+      alphaNumericUnderscore: {
+        en: '{{property}} must contain only letters, numbers, and underscores'
       },
       equalTo: {
         en: '{{lh}} must be equal to {{rh}}'

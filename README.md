@@ -197,17 +197,17 @@ Compare property to a number or another property set in `options`.
 
 Property must contain only letters.
 
-#### `alphaDash`
-
-Property must contain only letters and dashes.
-
 #### `alphaNumeric`
 
 Property must contain only letters and numbers.
 
-#### `alphaUnderscore`
+#### `alphaNumericDash`
 
-Property must contain only letters and underscores.
+Property must contain only letters, numbers and dashes.
+
+#### `alphaNumericUnderscore`
+
+Property must contain only letters, numbers and underscores.
 
 #### `email`
 
