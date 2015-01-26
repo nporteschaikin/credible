@@ -7,7 +7,7 @@ Credible is a library for validating objects in node.js or the browser.  While i
 
 ## Installation
 
-Credible has one dependency: An A+ promise library, (i.e. [bluebird](https://github.com/petkaantonov/bluebird) or [when.js](https://github.com/cujojs/when))
+Credible has one dependency: An A+ promise library, i.e. [bluebird](https://github.com/petkaantonov/bluebird) or [when.js](https://github.com/cujojs/when).
 
 #### Node.js
 
@@ -15,12 +15,16 @@ Credible has one dependency: An A+ promise library, (i.e. [bluebird](https://git
 $ npm install credible --save
 ```
 
+Node takes care of the dependency automatically.
+
 #### Browser
 
 ```html
 <script src="/bluebird.js"></script>
 <script src="/credible.js"></script>
 ```
+
+By default, Credible uses [bluebird](https://github.com/petkaantonov/bluebird); to use a different implementation, set `Credible.Promise` to the correct library.
 
 ## Usage
 
