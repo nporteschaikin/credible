@@ -99,3 +99,27 @@ describe('.rule', function () {
   });
 
 });
+
+describe('validators', function () {
+
+  it('should test for presence', function (ok) {
+    var credible = new Credible()
+    credible.rule('name', 'presence', true);
+    credible.run({name: ''})
+      .catch(function (e) {
+        should(e.toString()).equal('name is required');
+        ok();
+      });
+  });
+
+  it('should test for length', function (ok) {
+    var credible = new Credible()
+    credible.rule('name', 'length', {greaterThan: 5});
+    credible.run({name: ''})
+    .catch(function (e) {
+      should(e.toString()).equal('name must be greater than 5 character(s)');
+      ok();
+    });
+  });
+
+})
