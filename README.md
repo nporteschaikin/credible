@@ -48,6 +48,8 @@ var credible = new Credible(rules)
 
 #### API
 
+Every method in a `Chainable` instance returns the instance _except_ `credible.run()`, which returns a promise.
+
 ##### `new Credible(arguments..)`
 
 The main `Credible` constructor _optionally_ accepts the same arguments as `credible.rule()` (see below).
