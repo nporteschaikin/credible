@@ -291,7 +291,7 @@
                   if (!!fn(obj)) return;
                 }
               }
-              return Promise.method(th._validator)(obj, name, th._options)
+              return V.Promise.method(th._validator)(obj, name, th._options)
                 .catch(function (name, prop) {
                   return function (error){
                     if (prop.invalid) {
@@ -306,9 +306,9 @@
                 }(name, prop))
             }());
           }
-          promise = Promise.all(promises);
+          promise = V.Promise.all(promises);
         } else {
-          promise = Promise.method(th._validator)(obj, th._options)
+          promise = V.Promise.method(th._validator)(obj, th._options)
             .catch(function(error) {
               _errors.push([error]);
             })
@@ -480,7 +480,7 @@
         var errors = []
           , th = this;
 
-        return Promise.map(th.validations, function (validation) {
+        return V.Promise.map(th.validations, function (validation) {
           return validation.run(obj)
             .catch (function (error) {
               if (error instanceof Array) {
@@ -520,6 +520,7 @@
     }
 
     V.locale = 'en';
+    V.Promise = Promise;
 
     return V;
 
