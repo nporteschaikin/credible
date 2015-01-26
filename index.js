@@ -17,24 +17,26 @@
     Validators = {
 
       length: function (obj, prop, options) {
-        var v = obj[prop].length, b, n, m;
+        var v = (obj[prop] || '').length, arr = [], errs = [], n;
         if (options.greaterThan) {
-          b = v > (n = options.greaterThan);
-          m = 'lengthGreaterThan';
-        } else if (options.lessThan) {
-          b = v < (n = options.lessThan);
-          m = 'lengthLessThan';
-        } else if (options.greaterThanOrEqualTo) {
-          b = v >= (n = options.greaterThanOrEqualTo);
-          m = 'lengthGreaterThanOrEqualTo';
-        } else if (options.lessThanOrEqualTo) {
-          b = v <= (n = options.lessThanOrEqualTo);
-          m = 'lengthLessThanOrEqualTo';
-        } else {
-          b = v == (n = options.equalTo);
-          m = 'lengthEqualTo';
+          arr.push([options.greaterThan, (v > options.greaterThan), 'lengthGreaterThan']);
         }
-        if (!b) throw new ValidatorMessage(m, {property: prop, num: n});
+        if (options.lessThan) {
+          arr.push([options.lessThan, (v < options.lessThan), 'lengthLessThan']);
+        }
+        if (options.greaterThanOrEqualTo) {
+          arr.push([options.greaterThanOrEqualTo, (v >= options.greaterThanOrEqualTo), 'lengthGreaterThanOrEqualTo']);
+        }
+        if (options.lessThanOrEqualTo) {
+          arr.push([options.lessThanOrEqualTo, (v <= options.lessThanOrEqualTo), 'lengthLessThanOrEqualTo']);
+        }
+        if (options.equalTo) {
+          arr.push([options.equalTo, (v == options.equalTo), 'lengthEqualTo']);
+        }
+        for (var key in arr) {
+          if (!arr[key][1]) errs.push(new ValidatorMessage(arr[key][2], { property: prop, num: arr[key][0] }))
+        }
+        if (errs.length) throw errs;
       },
 
       presence: function (obj, prop) {
@@ -42,26 +44,31 @@
       },
 
       operator: function (obj, prop, options) {
-        var lhv = obj[lh]
-          , rhv = 'string' === typeof rh ? obj[rh] : rh
-          , b, m;
-        if (options.greaterThan) {
-          b = lhv > rhv;
-          m = 'greaterThan';
-        } else if (options.lessThan) {
-          b = lhv < rhv;
-          m = 'lessThan';
-        } else if (options.greaterThanOrEqualTo) {
-          b = lhv >= rhv;
-          m = 'greaterThanOrEqualTo';
-        } else if (options.lessThanOrEqualTo) {
-          b = lhv <= rhv;
-          m = 'lessThanOrEqualTo';
-        } else {
-          b = lhv == rhv;
-          m = 'equalTo';
+        var lhv = obj[prop]
+          , arr = []
+          , errs = []
+          , isProp
+          , rhv;
+        for (var key in options) {
+          isProp = 'string' === typeof options[key];
+          rhv = isProp ? obj[options[key]] : options[key];
+          if ('greaterThan' === key) {
+            arr.push([rhv, (lhv > rhv), 'greaterThan', isProp, options[key]]);
+          } else if ('lessThan' === key) {
+            arr.push([rhv, (lhv < rhv), 'lessThan', isProp, options[key]]);
+          } else if ('greaterThanOrEqualTo' === key) {
+            arr.push([rhv, (lhv >= rhv), 'greaterThanOrEqualTo', isProp, options[key]]);
+          } else if ('lessThanOrEqualTo' === key) {
+            arr.push([rhv, (lhv <= rhv), 'lessThanOrEqualTo', isProp, options[key]]);
+          } else if ('equalTo' === key) {
+            arr.push([rhv, (lhv == rhv), 'equalTo', isProp, options[key]]);
+          }
         }
-        if (!b) throw new ValidatorMessage(m, {lh: lh, rh: 'string' === typeof rh ? rh : rhv});
+        for (var key in arr) {
+          if (!arr[key][1])
+            errs.push(new ValidatorMessage(arr[key][2], { lh: prop, rh: arr[key][3] ? arr[key][4] : arr[key][0] }));
+        }
+        if (errs.length) throw errs;
       }
 
     },
@@ -291,10 +298,10 @@
                       try {
                         prop.catch(obj);
                       } catch (e) {
-                        _errors = e;
+                        error = e;
                       }
                     }
-                    _errors.push(new ValidationError(error, name));
+                    _errors.push([error, name]);
                   }
                 }(name, prop))
             }());
@@ -303,19 +310,27 @@
         } else {
           promise = Promise.method(th._validator)(obj, th._options)
             .catch(function(error) {
-              _errors.push(new ValidationError(error));
+              _errors.push([error]);
             })
         }
         return promise.then(function () {
+          var errs = [], error;
           if (_errors.length) {
             if (th._catchAll) {
               try {
                 th._catchAll(obj);
               } catch (e) {
-                _errors = e;
+                _errors = [e];
               }
             }
-            throw _errors;
+            for (var key in _errors) {
+              error = _errors[key];
+              if (!(error[0] instanceof Array)) error[0] = [error[0]];
+              for (var k in error[0]) {
+                errs = errs.concat(new ValidationError(error[0][k], error[1]));
+              }
+            }
+            throw errs;
           }
           return th;
         });
