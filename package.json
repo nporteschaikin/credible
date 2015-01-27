@@ -1,6 +1,6 @@
 {
   "name": "credible",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "author": "Noah Portes Chaikin <noah.porteschaikin@carrotcreative.com>",
   "description": "Unopinionated validation framework for node and the browser.",
   "license": "MIT",
