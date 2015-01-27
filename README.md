@@ -170,9 +170,9 @@ Property must have a length matching specifications set in `options`.
 | Key | Description |
 | --- | ----------- |
 | `greaterThan: number` | Property must have a length greater than `number` |
-| `lessThan: number` | Property must have a length greater than `number` |
-| `greaterThanOrEqualTo: number` | Property must have a length greater than `number` |
-| `lessThanOrEqualTo: number` | Property must have a length greater than `number` |
+| `lessThan: number` | Property must have a length less than `number` |
+| `greaterThanOrEqualTo: number` | Property must have a length greater than or equal to `number` |
+| `lessThanOrEqualTo: number` | Property must have a length less than or equal to `number` |
 | `equalTo: number` | Property must have a length equal to `number` |
 
 #### `presence`
@@ -188,9 +188,9 @@ Compare property to a number or another property set in `options`.
 | Key | Description |
 | --- | ----------- |
 | `greaterThan: numberOrProperty` | Property must have a length greater than `numberOrProperty` |
-| `lessThan: numberOrProperty` | Property must have a length greater than `numberOrProperty` |
-| `greaterThanOrEqualTo: numberOrProperty` | Property must have a length greater than `numberOrProperty` |
-| `lessThanOrEqualTo: numberOrProperty` | Property must have a length greater than `numberOrProperty` |
+| `lessThan: numberOrProperty` | Property must have a length less than `numberOrProperty` |
+| `greaterThanOrEqualTo: numberOrProperty` | Property must have a length greater than or equal to `numberOrProperty` |
+| `lessThanOrEqualTo: numberOrProperty` | Property must have a length less than or equal to `numberOrProperty` |
 | `equalTo: numberOrProperty` | Property must have a length equal to `numberOrProperty` |
 
 #### `alpha`
