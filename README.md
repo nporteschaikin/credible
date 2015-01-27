@@ -52,7 +52,7 @@ var credible = new Credible(rules)
 
 #### API
 
-Every method in a `Chainable` instance returns the instance _except_ `credible.run()`, which returns a promise.
+Every method in a `Credible` instance returns the instance _except_ `credible.run()`, which returns a promise.
 
 ##### `new Credible(arguments..)`
 
@@ -64,8 +64,8 @@ Used to set new rules.  `credible.rule()` is a variadic function; it accepts any
 
 ```javascript
 credible
-  .rule(property, validator, options)
-  .rule(property, { validator1: options, validator2: options })
+  .rule(properties, validator, options)
+  .rule(properties, { validator1: options, validator2: options })
   .rule(validator, options)
 ```
 
@@ -75,7 +75,8 @@ credible
 credible
   .rule('name', 'presence', true)
   .rule('name', { length: { greaterThan: 5 } })
-  .rule({ email: { email: { if: function (obj) { return obj.email; } } } })
+  .rule(['firstName, lastName'], { length: { greaterThan: 5 } })
+  .rule({ name: { presence: true }, email: { email: { if: function (obj) { return obj.email; } } } })
 ```
 
 On validation, a validator function is passed the object, the property key (if provided), and options.  Validator functions can return promises for asynchronous validation. This is an example validator:
@@ -96,9 +97,9 @@ Validators can be sent any number of settings in the `options` object; the follo
 | `unless: fn` | Only validate if `fn` returns `false`. `fn` is a function; the object being validated is passed to `fn` as an argument. |
 | `invalid: fn` | `fn` is a function to handle a failed validation; the object being validated is passed to `fn` as an argument. |
 
-##### `credible.if([property], fn)`
+##### `credible.if([properties], fn)`
 
-Only run validator if `fn` (a function) returns `true`.  `fn` is passed the object being validated.  Optionally, passing `property` will only execute the test on validators executed on the specified property.
+Only run validator if `fn` (a function) returns `true`.  `fn` is passed the object being validated.  Optionally, passing `properties` will only execute the test on validators executed on the specified properties.
 
 ```javascript
 credible
@@ -110,11 +111,16 @@ credible
   .if('name', function (object) {
     return object.foo == 'bar';
   });
+
+credible
+  .if(['firstName', 'lastName'], function (object) {
+    return object.foo == 'bar';
+  });
 ```
 
 ##### `credible.unless([property], fn)`
 
-Only run validator if `fn` (a function) returns `false`.  `fn` is passed the object being validated.  Optionally, passing `property` will only execute the test on validators executed on the specified property.
+Only run validator if `fn` (a function) returns `false`.  `fn` is passed the object being validated.  Optionally, passing `properties` will only execute the test on validators executed on the specified properties.
 
 ```javascript
 credible
@@ -126,11 +132,16 @@ credible
   .unless('name', function (object) {
     return object.foo == 'bar';
   });
+
+credible
+  .unless(['firstName', 'lastName'], function (object) {
+    return object.foo == 'bar';
+  });
 ```
 
 ##### `credible.invalid([property], fn)`
 
-Pass `fn`, a function, for handling a failed validation. `fn` is passed the object being validated.  Optionally, passing `property` will only execute the function for failed validations executed on the specified property.
+Pass `fn`, a function, for handling a failed validation. `fn` is passed the object being validated.  Optionally, passing `properties` will only execute the function for failed validations executed on the specified properties.
 
 ```javascript
 credible
@@ -140,6 +151,11 @@ credible
 
 credible
   .invalid('name', function (object) {
+    throw 'This name is invalid.';
+  });
+
+credible
+  .invalid(['firstName', 'lastName'], function (object) {
     throw 'This name is invalid.';
   });
 ```
