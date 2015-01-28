@@ -3,8 +3,9 @@
 
 var uniquenessValidator = function (model, property) {
 
-  // Create a new model.
-  var user = new model.constructor(),
+  // Get the property value in
+  // the tested model.
+  var value = model.get(property),
 
   // Create a new instance
   // of the same model.
@@ -32,7 +33,8 @@ var uniquenessValidator = function (model, property) {
 
 // Example usage:
 //
-// var user = new User({email: 'noah.porteschaikin@carrotcreative.com'})
+// var Credible = require('credible')
+//   , user = new User({email: 'noah.porteschaikin@carrotcreative.com'});
 //   , validator = new Credible();
 //
 // validator
