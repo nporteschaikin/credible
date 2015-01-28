@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bluebird/2.8.1/bluebird.js" type="text/javascript"></script>
+  <script src="../../credible.js" type="text/javascript"></script>
+</head>
+<body>
+
+  <form id="signUpForm">
+    <div>
+      <label>First Name:</label>
+      <input type="text" name="firstName" />
+    </div>
+    <div>
+      <label>Last Name:</label>
+      <input type="text" name="lastName" />
+    </div>
+    <div>
+      <label>E-mail Address:</label>
+      <input type="text" name="email" />
+    </div>
+    <div>
+      <label>Password:</label>
+      <input type="password" name="password" />
+    </div>
+    <div>
+      <label>Password Confirmation:</label>
+      <input type="password" name="passwordConfirmatio" />
+    </div>
+    <div>
+      <button type="submit">Sign Up</button>
+    </div>
+  </form>
+
+  <script type="text/javascript">
+  var form = document.getElementById('signUpForm');
+  form.addEventListener('submit', function (e) {
+
+    // Prevent the default event response.
+    e.preventDefault();
+
+    // Create an object of form values.
+    var obj = {}, $el;
+    for (var x=0; x<form.elements.length; x++) {
+      $el = form.elements.item(x);
+      obj[$el.getAttribute('name')] = $el.value;
+    }
+
+    // Construct a new Credible instance.
+    // Returns a chainable object.
+    var credible = new Credible();
+
+    credible
+      // firstName, lastName, email,
+      // and password are required.
+      .rule(['firstName', 'lastName', 'email', 'password'], 'presence')
+
+      // email must be a valid e-mail address.
+      // Only checks if e-mail is present.
+      .rule('email', 'email', { if: function (obj) { return obj.email; } } )
+
+      // password must match passwordConfirmation.
+      // Only checks if password is present.
+      .rule('password', 'operator', { equalTo: 'passwordConfirmation', if: function (obj) { return obj.password } })
+
+      // Run the validator on the form object
+      // created above. Returns a promise.
+      .run(obj)
+
+      // If the form is valid, alert the user.
+      .then(function () {
+        alert('User is valid!');
+      })
+
+      // If the form is invalid, send an alert
+      // with a string of formatted messages.
+      .catch(function (errors) {
+        alert(errors.toString());
+      });
+
+  });
+</script>
+</body>
+</html>
