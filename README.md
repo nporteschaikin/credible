@@ -50,6 +50,8 @@ var credible = new Credible(rules)
   })
 ```
 
+See [examples](examples).
+
 #### API
 
 Every method in a `Credible` instance returns the instance _except_ `credible.run()`, which returns a promise.
