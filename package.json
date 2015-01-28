@@ -4,6 +4,7 @@
   "author": "Noah Portes Chaikin <noah.porteschaikin@carrotcreative.com>",
   "description": "Unopinionated validation framework for node and the browser.",
   "license": "MIT",
+  "main": "credible.js",
   "keywords": [
     "validation"
   ],
