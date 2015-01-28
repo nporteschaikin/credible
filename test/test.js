@@ -111,6 +111,11 @@ describe('validators', function () {
         .run({name: 'bob'})
         .catch(function (e) {
           should(e.toString()).equal('name must be greater than 5 character(s)');
+        })
+        .then(function () {
+          return credible.run({name: 'chris thompson'})
+        })
+        .then(function () {
           ok();
         });
     });
@@ -122,6 +127,11 @@ describe('validators', function () {
         .run({name: 'christopher'})
         .catch(function (e) {
           should(e.toString()).equal('name must be less than 5 character(s)');
+        })
+        .then(function () {
+          return credible.run({name: 'CT'})
+        })
+        .then(function () {
           ok();
         });
     });
@@ -133,6 +143,11 @@ describe('validators', function () {
         .run({name: 'foo'})
         .catch(function (e) {
           should(e.toString()).equal('name must be greater than or equal to 5 character(s)');
+        })
+        .then(function () {
+          return credible.run({name: 'chris thompson'})
+        })
+        .then(function () {
           ok();
         });
     });
@@ -144,6 +159,11 @@ describe('validators', function () {
         .run({name: 'christopher'})
         .catch(function (e) {
           should(e.toString()).equal('name must be less than or equal to 5 character(s)');
+        })
+        .then(function () {
+          return credible.run({name: 'noah'})
+        })
+        .then(function () {
           ok();
         });
     });
@@ -155,6 +175,11 @@ describe('validators', function () {
         .run({name: 'noah'})
         .catch(function (e) {
           should(e.toString()).equal('name must have 5 character(s)');
+        })
+        .then(function () {
+          return credible.run({name: 'chris'})
+        })
+        .then(function () {
           ok();
         });
     });
@@ -187,6 +212,11 @@ describe('validators', function () {
         .run({name: ''})
         .catch(function (e) {
           should(e.toString()).equal('name is required');
+        })
+        .then(function () {
+          return credible.run({name: 'Noah'})
+        })
+        .then(function () {
           ok();
         });
     });
@@ -202,6 +232,11 @@ describe('validators', function () {
         .run({number: 3})
         .catch(function (e) {
           should(e.toString()).equal('number must be greater than 5');
+        })
+        .then(function () {
+          return credible.run({number: 6})
+        })
+        .then(function () {
           ok();
         });
     });
@@ -333,6 +368,11 @@ describe('validators', function () {
         .run({name: '1234adsf'})
         .catch(function (e) {
           should(e.toString()).equal('name must contain only letters');
+        })
+        .then(function () {
+          return credible.run({name: 'noah'})
+        })
+        .then(function () {
           ok();
         });
     });
@@ -348,6 +388,11 @@ describe('validators', function () {
         .run({name: 'asdfasf-42134'})
         .catch(function (e) {
           should(e.toString()).equal('name must contain only letters and numbers');
+        })
+        .then(function () {
+          return credible.run({name: 'noah123'})
+        })
+        .then(function () {
           ok();
         });
     });
@@ -363,6 +408,11 @@ describe('validators', function () {
         .run({name: '!@#$!@#$asdfafs'})
         .catch(function (e) {
           should(e.toString()).equal('name must contain only letters, numbers, and dashes');
+        })
+        .then(function () {
+          return credible.run({name: 'noah-123'})
+        })
+        .then(function () {
           ok();
         });
     });
@@ -378,6 +428,11 @@ describe('validators', function () {
         .run({name: '1234ads$$f'})
         .catch(function (e) {
           should(e.toString()).equal('name must contain only letters, numbers, and underscores');
+        })
+        .then(function () {
+          return credible.run({name: 'noah_123'})
+        })
+        .then(function () {
           ok();
         });
     });
@@ -393,6 +448,11 @@ describe('validators', function () {
         .run({email: 'noah'})
         .catch(function (e) {
           should(e.toString()).equal('email must be a valid e-mail address');
+        })
+        .then(function () {
+          return credible.run({email: 'noah.porteschaikin@carrotcreative.com'})
+        })
+        .then(function () {
           ok();
         });
     });
@@ -408,6 +468,11 @@ describe('validators', function () {
         .run({num: -5.3})
         .catch(function (e) {
           should(e.toString()).equal('num must be a valid integer');
+        })
+        .then(function () {
+          return credible.run({num: 1})
+        })
+        .then(function () {
           ok();
         });
     });
@@ -423,6 +488,11 @@ describe('validators', function () {
         .run({num: -5.3})
         .catch(function (e) {
           should(e.toString()).equal('num must be a positive number');
+        })
+        .then(function () {
+          return credible.run({num: 0})
+        })
+        .then(function () {
           ok();
         });
     });
@@ -438,6 +508,11 @@ describe('validators', function () {
         .run({num: -5.3})
         .catch(function (e) {
           should(e.toString()).equal('num must be a positive number and not be zero');
+        })
+        .then(function () {
+          return credible.run({num: 1})
+        })
+        .then(function () {
           ok();
         });
     });
@@ -453,6 +528,11 @@ describe('validators', function () {
         .run({url: 'asdfasdfasfasdfasdfasdfasdfa'})
         .catch(function (e) {
           should(e.toString()).equal('url must be a valid URL');
+        })
+        .then(function () {
+          return credible.run({url: 'http://carrot.is'})
+        })
+        .then(function () {
           ok();
         });
     });
