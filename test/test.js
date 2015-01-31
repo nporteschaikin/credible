@@ -547,7 +547,7 @@ describe('validators', function () {
         .rule('foo', 'array')
         .run({foo: 'foo'})
         .catch(function (e) {
-          should(e.toString()).equal('foo is not an array');
+          should(e.toString()).equal('foo must be an array');
         })
         .then(function () {
           return credible.run({foo: ['bar']})
@@ -567,7 +567,7 @@ describe('validators', function () {
       .rule('foo', 'fn')
       .run({foo: 'foo'})
       .catch(function (e) {
-        should(e.toString()).equal('foo is not a function');
+        should(e.toString()).equal('foo must be a function');
       })
       .then(function () {
         return credible.run({foo: function () { throw 'bar'; }})
@@ -587,7 +587,7 @@ describe('validators', function () {
         .rule('foo', 'number')
         .run({foo: 'foo'})
         .catch(function (e) {
-          should(e.toString()).equal('foo is not a number');
+          should(e.toString()).equal('foo must be a number');
         })
         .then(function () {
           return credible.run({foo: 1});
@@ -607,7 +607,7 @@ describe('validators', function () {
         .rule('foo', 'string')
         .run({foo: 1})
         .catch(function (e) {
-          should(e.toString()).equal('foo is not a string');
+          should(e.toString()).equal('foo must be a string');
         })
         .then(function () {
           return credible.run({foo: 'string'})

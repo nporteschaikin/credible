@@ -120,7 +120,7 @@
         en: '{{property}} must contain only letters, numbers, and underscores'
       },
       array: {
-        en: '{{property}} is not an array'
+        en: '{{property}} must be an array'
       },
       equalTo: {
         en: '{{lh}} must be equal to {{rh}}'
@@ -129,7 +129,7 @@
         en: '{{property}} must be a valid e-mail address'
       },
       fn: {
-        en: '{{property}} is not a function'
+        en: '{{property}} must be a function'
       },
       greaterThan: {
         en: '{{lh}} must be greater than {{rh}}'
@@ -168,16 +168,16 @@
         en: '{{property}} must be a positive number and not be zero'
       },
       number: {
-        en: '{{property}} is not a number'
+        en: '{{property}} must be a number'
       },
       object: {
-        en: '{{property}} is not an object'
+        en: '{{property}} must be an object'
       },
       presence: {
         en: '{{property}} is required'
       },
       string: {
-        en: '{{property}} is not a string'
+        en: '{{property}} must be a string'
       },
       url: {
         en: '{{property}} must be a valid URL'

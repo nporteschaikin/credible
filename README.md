@@ -197,7 +197,7 @@ Property must contain only letters, numbers and underscores.
 
 #### `array`
 
-Property is an array.
+Property must be an array.
 
 #### `email`
 
@@ -205,7 +205,7 @@ Property must be a valid e-mail address.
 
 #### `fn`
 
-Property is a function.
+Property must be a function.
 
 #### `integer`
 
@@ -235,7 +235,7 @@ Property must be a positive number greater than zero.
 
 #### `number`
 
-Property is a number.
+Property must be a number.
 
 #### `presence`
 
@@ -243,7 +243,7 @@ Property must be defined and not empty.
 
 #### `object`
 
-Property is an object.
+Property must be an object.
 
 #### `operator`
 
@@ -261,7 +261,7 @@ Compare property to a number or another property set in `options`.
 
 #### `string`
 
-Property is a string.
+Property must be a string.
 
 #### `url`
 
