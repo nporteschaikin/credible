@@ -599,9 +599,9 @@ describe('validators', function () {
 
   });
 
-  describe('number', function () {
+  describe('string', function () {
 
-    it('should test that a property is a number', function (ok) {
+    it('should test that a property is a string', function (ok) {
       var credible = new Credible()
       credible
         .rule('foo', 'string')
@@ -611,6 +611,106 @@ describe('validators', function () {
         })
         .then(function () {
           return credible.run({foo: 'string'})
+        })
+        .then(function () {
+          ok();
+        });
+    });
+
+  });
+
+  describe('boolean', function () {
+
+    it('should test that a property is a boolean', function (ok) {
+      var credible = new Credible()
+      credible
+        .rule('foo', 'boolean')
+        .run({foo: 1})
+        .catch(function (e) {
+          should(e.toString()).equal('foo must be a boolean');
+        })
+        .then(function () {
+          return credible.run({foo: true})
+        })
+        .then(function () {
+          ok();
+        });
+    });
+
+  });
+
+  describe('exists', function () {
+
+    it('should test that a property exists', function (ok) {
+      var credible = new Credible()
+      credible
+        .rule('foo', 'exists')
+        .run({bar: 1})
+        .catch(function (e) {
+          should(e.toString()).equal('foo must exist');
+        })
+        .then(function () {
+          return credible.run({foo: true})
+        })
+        .then(function () {
+          ok();
+        });
+    });
+
+  });
+
+  describe('NaN', function () {
+
+    it('should test that a property is NaN', function (ok) {
+      var credible = new Credible()
+      credible
+      .rule('foo', 'NaN')
+      .run({foo: 1})
+      .catch(function (e) {
+        should(e.toString()).equal('foo must not be a number');
+      })
+      .then(function () {
+        return credible.run({foo: 'foo'})
+      })
+      .then(function () {
+        ok();
+      });
+    });
+
+  });
+
+  describe('regexp', function () {
+
+    it('should test that a property is a regular expression', function (ok) {
+      var credible = new Credible()
+      credible
+      .rule('foo', 'regexp')
+      .run({foo: 'foo'})
+      .catch(function (e) {
+        should(e.toString()).equal('foo must be a regular expression');
+      })
+      .then(function () {
+        return credible.run({foo: /^[a-z]{0,3}$/});
+      })
+      .then(function () {
+        ok();
+      });
+    });
+
+  });
+
+  describe('date', function () {
+
+    it('should test that a property is a Date object', function (ok) {
+      var credible = new Credible()
+      credible
+        .rule('foo', 'date')
+        .run({foo: 'foo'})
+        .catch(function (e) {
+          should(e.toString()).equal('foo must be a date');
+        })
+        .then(function () {
+          return credible.run({foo: new Date()});
         })
         .then(function () {
           ok();
