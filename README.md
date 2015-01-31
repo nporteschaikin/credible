@@ -179,38 +179,6 @@ credible
 
 ## Available Validators
 
-#### `length`
-
-Property must have a length matching specifications set in `options`.
-
-##### Options
-
-| Key | Description |
-| --- | ----------- |
-| `greaterThan: number` | Property must have a length greater than `number` |
-| `lessThan: number` | Property must have a length less than `number` |
-| `greaterThanOrEqualTo: number` | Property must have a length greater than or equal to `number` |
-| `lessThanOrEqualTo: number` | Property must have a length less than or equal to `number` |
-| `equalTo: number` | Property must have a length equal to `number` |
-
-#### `presence`
-
-Property must be defined and not empty.
-
-#### `operator`
-
-Compare property to a number or another property set in `options`.
-
-##### Options
-
-| Key | Description |
-| --- | ----------- |
-| `greaterThan: numberOrProperty` | Property must have a length greater than `numberOrProperty` |
-| `lessThan: numberOrProperty` | Property must have a length less than `numberOrProperty` |
-| `greaterThanOrEqualTo: numberOrProperty` | Property must have a length greater than or equal to `numberOrProperty` |
-| `lessThanOrEqualTo: numberOrProperty` | Property must have a length less than or equal to `numberOrProperty` |
-| `equalTo: numberOrProperty` | Property must have a length equal to `numberOrProperty` |
-
 #### `alpha`
 
 Property must contain only letters.
@@ -227,13 +195,35 @@ Property must contain only letters, numbers and dashes.
 
 Property must contain only letters, numbers and underscores.
 
+#### `array`
+
+Property is an array.
+
 #### `email`
 
 Property must be a valid e-mail address.
 
+#### `fn`
+
+Property is a function.
+
 #### `integer`
 
 Property must be an integer.
+
+#### `length`
+
+Property must have a length matching specifications set in `options`.
+
+##### Options
+
+| Key | Description |
+| --- | ----------- |
+| `greaterThan: number` | Property must have a length greater than `number` |
+| `lessThan: number` | Property must have a length less than `number` |
+| `greaterThanOrEqualTo: number` | Property must have a length greater than or equal to `number` |
+| `lessThanOrEqualTo: number` | Property must have a length less than or equal to `number` |
+| `equalTo: number` | Property must have a length equal to `number` |
 
 #### `natural`
 
@@ -242,6 +232,36 @@ Property must be a positive number.
 #### `naturalNonZero`
 
 Property must be a positive number greater than zero.
+
+#### `number`
+
+Property is a number.
+
+#### `presence`
+
+Property must be defined and not empty.
+
+#### `object`
+
+Property is an object.
+
+#### `operator`
+
+Compare property to a number or another property set in `options`.
+
+##### Options
+
+| Key | Description |
+| --- | ----------- |
+| `greaterThan: numberOrProperty` | Property must have a length greater than `numberOrProperty` |
+| `lessThan: numberOrProperty` | Property must have a length less than `numberOrProperty` |
+| `greaterThanOrEqualTo: numberOrProperty` | Property must have a length greater than or equal to `numberOrProperty` |
+| `lessThanOrEqualTo: numberOrProperty` | Property must have a length less than or equal to `numberOrProperty` |
+| `equalTo: numberOrProperty` | Property must have a length equal to `numberOrProperty` |
+
+#### `string`
+
+Property is a string.
 
 #### `url`
 
