@@ -77,7 +77,7 @@ credible
 credible
   .rule('name', 'presence', true)
   .rule('name', { length: { greaterThan: 5 } })
-  .rule(['firstName, lastName'], { length: { greaterThan: 5 } })
+  .rule(['firstName', 'lastName'], { length: { greaterThan: 5 } })
   .rule({ name: { presence: true }, email: { email: { if: function (obj) { return obj.email; } } } })
 ```
 
