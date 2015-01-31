@@ -84,7 +84,7 @@
       },
 
       presence: function (obj, prop) {
-        if (!obj[prop]) throw new ValidatorMessage('presence', {property: prop});
+        if (obj[prop] == null || obj[prop] == '') throw new ValidatorMessage('presence', {property: prop});
       },
 
       string: function (obj, prop) {
