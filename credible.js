@@ -20,6 +20,18 @@
         if (!(obj[prop] instanceof Array)) throw new ValidatorMessage('array', {property: prop});
       },
 
+      date: function (obj, prop) {
+        if (!(obj[prop] instanceof Date)) throw new ValidatorMessage('date', {property: prop});
+      },
+
+      exists: function (obj, prop) {
+        if ('undefined' === typeof obj[prop]) throw new ValidatorMessage('exists', {property: prop});
+      },
+
+      boolean: function (obj, prop) {
+        if (!('boolean' === typeof obj[prop])) throw new ValidatorMessage('boolean', {property: prop});
+      },
+
       fn: function (obj, prop) {
         if (!('function' === typeof obj[prop])) throw new ValidatorMessage('fn', {property: prop});
       },
@@ -45,6 +57,10 @@
           if (!arr[key][1]) errs.push(new ValidatorMessage(arr[key][2], { property: prop, num: arr[key][0] }))
         }
         if (errs.length) throw errs;
+      },
+
+      NaN: function (obj, prop) {
+        if (!isNaN(obj[prop])) throw new ValidatorMessage('NaN', {property: prop});
       },
 
       number: function (obj, prop) {
@@ -84,7 +100,11 @@
       },
 
       presence: function (obj, prop) {
-        if (!obj[prop]) throw new ValidatorMessage('presence', {property: prop});
+        if (obj[prop] == null || obj[prop] == '') throw new ValidatorMessage('presence', {property: prop});
+      },
+
+      regexp: function (obj, prop) {
+        if (!(obj[prop] instanceof RegExp)) throw new ValidatorMessage('regexp', {property: prop});
       },
 
       string: function (obj, prop) {
@@ -122,11 +142,20 @@
       array: {
         en: '{{property}} must be an array'
       },
+      boolean: {
+        en: '{{property}} must be a boolean'
+      },
+      date: {
+        en: '{{property}} must be a date'
+      },
       equalTo: {
         en: '{{lh}} must be equal to {{rh}}'
       },
       email: {
         en: '{{property}} must be a valid e-mail address'
+      },
+      exists: {
+        en: '{{property}} must exist'
       },
       fn: {
         en: '{{property}} must be a function'
@@ -161,6 +190,9 @@
       lessThanOrEqualTo: {
         en: '{{lh}} must be less than or equal to {{rh}}'
       },
+      NaN: {
+        en: '{{property}} must not be a number'
+      },
       natural: {
         en: '{{property}} must be a positive number'
       },
@@ -175,6 +207,9 @@
       },
       presence: {
         en: '{{property}} is required'
+      },
+      regexp: {
+        en: '{{property}} must be a regular expression'
       },
       string: {
         en: '{{property}} must be a string'
