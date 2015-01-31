@@ -539,4 +539,84 @@ describe('validators', function () {
 
   });
 
+  describe('array', function () {
+
+    it('should test that a property is an array', function (ok) {
+      var credible = new Credible()
+      credible
+        .rule('foo', 'array')
+        .run({foo: 'foo'})
+        .catch(function (e) {
+          should(e.toString()).equal('foo must be an array');
+        })
+        .then(function () {
+          return credible.run({foo: ['bar']})
+        })
+        .then(function () {
+          ok();
+        });
+    });
+
+  });
+
+  describe('fn', function () {
+
+    it('should test that a property is an function', function (ok) {
+      var credible = new Credible()
+      credible
+      .rule('foo', 'fn')
+      .run({foo: 'foo'})
+      .catch(function (e) {
+        should(e.toString()).equal('foo must be a function');
+      })
+      .then(function () {
+        return credible.run({foo: function () { throw 'bar'; }})
+      })
+      .then(function () {
+        ok();
+      });
+    });
+
+  });
+
+  describe('number', function () {
+
+    it('should test that a property is a number', function (ok) {
+      var credible = new Credible()
+      credible
+        .rule('foo', 'number')
+        .run({foo: 'foo'})
+        .catch(function (e) {
+          should(e.toString()).equal('foo must be a number');
+        })
+        .then(function () {
+          return credible.run({foo: 1});
+        })
+        .then(function () {
+          ok();
+        });
+    });
+
+  });
+
+  describe('number', function () {
+
+    it('should test that a property is a number', function (ok) {
+      var credible = new Credible()
+      credible
+        .rule('foo', 'string')
+        .run({foo: 1})
+        .catch(function (e) {
+          should(e.toString()).equal('foo must be a string');
+        })
+        .then(function () {
+          return credible.run({foo: 'string'})
+        })
+        .then(function () {
+          ok();
+        });
+    });
+
+  });
+
 })

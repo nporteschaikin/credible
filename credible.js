@@ -16,6 +16,14 @@
 
     Validators = {
 
+      array: function (obj, prop) {
+        if (!(obj[prop] instanceof Array)) throw new ValidatorMessage('array', {property: prop});
+      },
+
+      fn: function (obj, prop) {
+        if (!('function' === typeof obj[prop])) throw new ValidatorMessage('fn', {property: prop});
+      },
+
       length: function (obj, prop, options) {
         var v = (obj[prop] || '').length, arr = [], errs = [], n;
         if (options.greaterThan) {
@@ -39,8 +47,12 @@
         if (errs.length) throw errs;
       },
 
-      presence: function (obj, prop) {
-        if (!obj[prop]) throw new ValidatorMessage('presence', {property: prop});
+      number: function (obj, prop) {
+        if (!('number' === typeof obj[prop])) throw new ValidatorMessage('number', {property: prop});
+      },
+
+      object: function (obj, prop) {
+        if (!('object' === typeof obj[prop])) throw new ValidatorMessage('object', {property: prop});
       },
 
       operator: function (obj, prop, options) {
@@ -69,6 +81,14 @@
             errs.push(new ValidatorMessage(arr[key][2], { lh: prop, rh: arr[key][3] ? arr[key][4] : arr[key][0] }));
         }
         if (errs.length) throw errs;
+      },
+
+      presence: function (obj, prop) {
+        if (!obj[prop]) throw new ValidatorMessage('presence', {property: prop});
+      },
+
+      string: function (obj, prop) {
+        if (!('string' === typeof obj[prop])) throw new ValidatorMessage('string', {property: prop});
       }
 
     },
@@ -99,11 +119,17 @@
       alphaNumericUnderscore: {
         en: '{{property}} must contain only letters, numbers, and underscores'
       },
+      array: {
+        en: '{{property}} must be an array'
+      },
       equalTo: {
         en: '{{lh}} must be equal to {{rh}}'
       },
       email: {
         en: '{{property}} must be a valid e-mail address'
+      },
+      fn: {
+        en: '{{property}} must be a function'
       },
       greaterThan: {
         en: '{{lh}} must be greater than {{rh}}'
@@ -141,8 +167,17 @@
       naturalNonZero: {
         en: '{{property}} must be a positive number and not be zero'
       },
+      number: {
+        en: '{{property}} must be a number'
+      },
+      object: {
+        en: '{{property}} must be an object'
+      },
       presence: {
         en: '{{property}} is required'
+      },
+      string: {
+        en: '{{property}} must be a string'
       },
       url: {
         en: '{{property}} must be a valid URL'
