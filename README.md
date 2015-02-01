@@ -21,7 +21,7 @@ Node takes care of the dependency automatically.
 
 ```html
 <script src="/bluebird.js"></script>
-<script src="/credible.js"></script>
+<script src="/credible.min.js"></script>
 ```
 
 By default, Credible uses [bluebird](https://github.com/petkaantonov/bluebird); to use a different implementation, set `Credible.Promise` to the correct library.
@@ -199,9 +199,21 @@ Property must contain only letters, numbers and underscores.
 
 Property must be an array.
 
+#### `boolean`
+
+Property must be a boolean (`true` or `false` onlyq).
+
+#### `date`
+
+Property must be a date (`Date` object).
+
 #### `email`
 
 Property must be a valid e-mail address.
+
+#### `exists`
+
+Property must exist (not be `undefined`).
 
 #### `fn`
 
@@ -233,6 +245,10 @@ Property must be a positive number.
 
 Property must be a positive number greater than zero.
 
+#### `NaN`
+
+Property must not be a number (`isNaN(value)` returns `false`).
+
 #### `number`
 
 Property must be a number.
@@ -258,6 +274,10 @@ Compare property to a number or another property set in `options`.
 | `greaterThanOrEqualTo: numberOrProperty` | Property must have a length greater than or equal to `numberOrProperty` |
 | `lessThanOrEqualTo: numberOrProperty` | Property must have a length less than or equal to `numberOrProperty` |
 | `equalTo: numberOrProperty` | Property must have a length equal to `numberOrProperty` |
+
+#### `regexp`
+
+Property must be a regular expression (`RegExp` object).
 
 #### `string`
 
