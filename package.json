@@ -20,6 +20,7 @@
   },
   "devDependencies": {
     "mocha": "1.x",
-    "should": "^4.6.1"
+    "should": "^4.6.1",
+    "uglify-js": "1.x"
   }
 }
