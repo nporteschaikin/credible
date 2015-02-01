@@ -59,6 +59,14 @@
         if (!('function' === typeof obj[prop])) throw new ValidatorMessage('fn', {property: prop});
       },
 
+      in: function (obj, prop, array) {
+        var isIn = false;
+        for (var key in array) {
+          if (array[key] === obj[prop]) isIn = true;
+        }
+        if (!isIn) throw new ValidatorMessage('in', {property: prop, arrayString: array.toString()});
+      },
+
       length: function (obj, prop, options) {
         var v = (obj[prop] || '').length, arr = [], errs = [], n;
         if (options.greaterThan) {
@@ -188,6 +196,9 @@
       },
       greaterThanOrEqualTo: {
         en: '{{lh}} must be greater than or equal to {{rh}}'
+      },
+      in: {
+        en: '{{property}} must be in {{arrayString}}'
       },
       integer: {
         en: '{{property}} must be a valid integer'

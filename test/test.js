@@ -719,4 +719,24 @@ describe('validators', function () {
 
   });
 
+  describe('in', function () {
+
+    it('should test that a property is in specified array', function (ok) {
+      var credible = new Credible()
+      credible
+        .rule('state', 'in', ['approved', 'pending'])
+        .run({state: 'foo'})
+        .catch(function (e) {
+          should(e.toString()).equal('state must be in approved,pending');
+        })
+        .then(function () {
+          return credible.run({state: 'approved'});
+        })
+        .then(function () {
+          ok();
+        });
+    });
+
+  });
+
 })

@@ -219,6 +219,15 @@ Property must exist (not be `undefined`).
 
 Property must be a function.
 
+#### `in`
+
+Property must be in specified array.
+
+```javascript
+credible
+  .rule( { state: { in: ['approved', 'pending'] } } );
+```
+
 #### `integer`
 
 Property must be an integer.
