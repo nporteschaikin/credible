@@ -90,6 +90,10 @@
         if (errs.length) throw errs;
       },
 
+      lowercase: function (obj, prop) {
+        if (obj[prop].toLowerCase() !== obj[prop]) throw new ValidatorMessage('lowercase', { property: prop });
+      },
+
       NaN: function (obj, prop) {
         if (!isNaN(obj[prop])) throw new ValidatorMessage('NaN', {property: prop});
       },
@@ -223,6 +227,9 @@
       },
       lessThanOrEqualTo: {
         en: '{{lh}} must be less than or equal to {{rh}}'
+      },
+      lowercase: {
+        en: '{{property}} must be lowercase'
       },
       NaN: {
         en: '{{property}} must not be a number'

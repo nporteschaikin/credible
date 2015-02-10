@@ -739,4 +739,24 @@ describe('validators', function () {
 
   });
 
+  describe('lowercase', function () {
+
+    it('should test that a property is lowercase', function (ok) {
+      var credible = new Credible()
+      credible
+        .rule('name', 'lowercase')
+        .run({name: 'Foo'})
+        .catch(function (e) {
+          should(e.toString()).equal('name must be lowercase');
+        })
+        .then(function () {
+          return credible.run({name: 'foo'});
+        })
+        .then(function () {
+          ok();
+        });
+    });
+
+  });
+
 })
