@@ -839,4 +839,24 @@ describe('validators', function () {
 
   });
 
+  describe('matches', function () {
+
+    it('should test that a property matches a regexp', function (ok) {
+      var credible = new Credible()
+      credible
+        .rule('email', 'matches', /^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,6}$/i)
+        .run({email: 'foo'})
+        .catch(function (e) {
+          should(e.toString()).equal('email must match the following regular expression: /^[a-z0-9._%+\\-]+@[a-z0-9.\\-]+\\.[a-z]{2,6}$/i');
+        })
+        .then(function () {
+          return credible.run({email: 'noah.porteschaikin@carrotcreative.com'});
+        })
+        .then(function () {
+          ok();
+        });
+    });
+
+  });
+
 })

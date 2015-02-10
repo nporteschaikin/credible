@@ -107,6 +107,10 @@
         if (obj[prop].toLowerCase() !== obj[prop]) throw new ValidatorMessage('lowercase', { property: prop });
       },
 
+      matches: function (obj, prop, regexp) {
+        if (!regexp.test(obj[prop])) throw new ValidatorMessage('matches', { property: prop, regexp: regexp });
+      },
+
       NaN: function (obj, prop) {
         if (!isNaN(obj[prop])) throw new ValidatorMessage('NaN', {property: prop});
       },
@@ -256,6 +260,9 @@
       },
       luhn: {
         en: '{{property}} must be a valid credit card number'
+      },
+      matches: {
+        en: '{{property}} must match the following regular expression: {{regexp}}'
       },
       NaN: {
         en: '{{property}} must not be a number'
