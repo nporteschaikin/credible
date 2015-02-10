@@ -144,6 +144,10 @@
 
       string: function (obj, prop) {
         if (!('string' === typeof obj[prop])) throw new ValidatorMessage('string', {property: prop});
+      },
+
+      uppercase: function (obj, prop) {
+        if (obj[prop].toUpperCase() !== obj[prop]) throw new ValidatorMessage('uppercase', { property: prop });
       }
 
     },
@@ -254,6 +258,9 @@
       },
       string: {
         en: '{{property}} must be a string'
+      },
+      uppercase: {
+        en: '{{property}} must be uppercase'
       },
       url: {
         en: '{{property}} must be a valid URL'

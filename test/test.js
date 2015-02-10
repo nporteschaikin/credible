@@ -759,4 +759,24 @@ describe('validators', function () {
 
   });
 
+  describe('uppercase', function () {
+
+    it('should test that a property is uppercase', function (ok) {
+      var credible = new Credible()
+      credible
+        .rule('name', 'uppercase')
+        .run({name: 'Foo'})
+        .catch(function (e) {
+          should(e.toString()).equal('name must be uppercase');
+        })
+        .then(function () {
+          return credible.run({name: 'FOO'});
+        })
+        .then(function () {
+          ok();
+        });
+    });
+
+  });
+
 })
