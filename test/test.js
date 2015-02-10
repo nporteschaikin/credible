@@ -799,4 +799,24 @@ describe('validators', function () {
 
   });
 
+  describe('json', function () {
+
+    it('should test that a property is valid JSON', function (ok) {
+      var credible = new Credible()
+      credible
+        .rule('json', 'json')
+        .run({json: 'foo'})
+        .catch(function (e) {
+          should(e.toString()).equal('json must be valid JSON');
+        })
+        .then(function () {
+          return credible.run({json: '{"foo": "bar"}'});
+        })
+        .then(function () {
+          ok();
+        });
+    });
+
+  });
+
 })

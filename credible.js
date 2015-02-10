@@ -68,6 +68,14 @@
         if (!isIn) throw new ValidatorMessage('in', {property: prop, arrayString: array.toString()});
       },
 
+      json: function (obj, prop) {
+        try {
+          JSON.parse(obj[prop]);
+        } catch (e) {
+          throw new ValidatorMessage('json', {property: prop});
+        }
+      },
+
       length: function (obj, prop, options) {
         var v = (obj[prop] || '').length, arr = [], errs = [], n;
         if (options.greaterThan) {
@@ -211,6 +219,9 @@
       },
       integer: {
         en: '{{property}} must be a valid integer'
+      },
+      json: {
+        en: '{{property}} must be valid JSON'
       },
       lengthEqualTo: {
         en: '{{property}} must have {{num}} character(s)'
