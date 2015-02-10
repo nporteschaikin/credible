@@ -819,4 +819,24 @@ describe('validators', function () {
 
   });
 
+  describe('contains', function () {
+
+    it('should test that a property contains a string', function (ok) {
+      var credible = new Credible()
+      credible
+        .rule('name', 'contains', 'noah')
+        .run({name: 'foo'})
+        .catch(function (e) {
+          should(e.toString()).equal('name must contain \'noah\'');
+        })
+        .then(function () {
+          return credible.run({name: 'noah portes chaikin'});
+        })
+        .then(function () {
+          ok();
+        });
+    });
+
+  });
+
 })

@@ -44,6 +44,10 @@
         if (!(obj[prop] instanceof Array)) throw new ValidatorMessage('array', {property: prop});
       },
 
+      contains: function (obj, prop, value) {
+        if (obj[prop].indexOf(value) < 0) throw new ValidatorMessage('contains', {property: prop, value: value});
+      },
+
       date: function (obj, prop) {
         if (!(obj[prop] instanceof Date)) throw new ValidatorMessage('date', {property: prop});
       },
@@ -192,6 +196,9 @@
       },
       boolean: {
         en: '{{property}} must be a boolean'
+      },
+      contains: {
+        en: '{{property}} must contain \'{{value}}\''
       },
       date: {
         en: '{{property}} must be a date'
