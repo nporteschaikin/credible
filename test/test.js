@@ -719,4 +719,144 @@ describe('validators', function () {
 
   });
 
+  describe('in', function () {
+
+    it('should test that a property is in specified array', function (ok) {
+      var credible = new Credible()
+      credible
+        .rule('state', 'in', ['approved', 'pending'])
+        .run({state: 'foo'})
+        .catch(function (e) {
+          should(e.toString()).equal('state must be in approved,pending');
+        })
+        .then(function () {
+          return credible.run({state: 'approved'});
+        })
+        .then(function () {
+          ok();
+        });
+    });
+
+  });
+
+  describe('lowercase', function () {
+
+    it('should test that a property is lowercase', function (ok) {
+      var credible = new Credible()
+      credible
+        .rule('name', 'lowercase')
+        .run({name: 'Foo'})
+        .catch(function (e) {
+          should(e.toString()).equal('name must be lowercase');
+        })
+        .then(function () {
+          return credible.run({name: 'foo'});
+        })
+        .then(function () {
+          ok();
+        });
+    });
+
+  });
+
+  describe('uppercase', function () {
+
+    it('should test that a property is uppercase', function (ok) {
+      var credible = new Credible()
+      credible
+        .rule('name', 'uppercase')
+        .run({name: 'Foo'})
+        .catch(function (e) {
+          should(e.toString()).equal('name must be uppercase');
+        })
+        .then(function () {
+          return credible.run({name: 'FOO'});
+        })
+        .then(function () {
+          ok();
+        });
+    });
+
+  });
+
+  describe('luhn', function () {
+
+    it('should test that a property is a valid credit card number', function (ok) {
+      var credible = new Credible()
+      credible
+        .rule('cc', 'luhn')
+        .run({cc: '2143'})
+        .catch(function (e) {
+          should(e.toString()).equal('cc must be a valid credit card number');
+        })
+        .then(function () {
+          return credible.run({cc: '4444444444444444'});
+        })
+        .then(function () {
+          ok();
+        });
+    });
+
+  });
+
+  describe('json', function () {
+
+    it('should test that a property is valid JSON', function (ok) {
+      var credible = new Credible()
+      credible
+        .rule('json', 'json')
+        .run({json: 'foo'})
+        .catch(function (e) {
+          should(e.toString()).equal('json must be valid JSON');
+        })
+        .then(function () {
+          return credible.run({json: '{"foo": "bar"}'});
+        })
+        .then(function () {
+          ok();
+        });
+    });
+
+  });
+
+  describe('contains', function () {
+
+    it('should test that a property contains a string', function (ok) {
+      var credible = new Credible()
+      credible
+        .rule('name', 'contains', 'noah')
+        .run({name: 'foo'})
+        .catch(function (e) {
+          should(e.toString()).equal('name must contain \'noah\'');
+        })
+        .then(function () {
+          return credible.run({name: 'noah portes chaikin'});
+        })
+        .then(function () {
+          ok();
+        });
+    });
+
+  });
+
+  describe('matches', function () {
+
+    it('should test that a property matches a regexp', function (ok) {
+      var credible = new Credible()
+      credible
+        .rule('email', 'matches', /^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,6}$/i)
+        .run({email: 'foo'})
+        .catch(function (e) {
+          should(e.toString()).equal('email must match the following regular expression: /^[a-z0-9._%+\\-]+@[a-z0-9.\\-]+\\.[a-z]{2,6}$/i');
+        })
+        .then(function () {
+          return credible.run({email: 'noah.porteschaikin@carrotcreative.com'});
+        })
+        .then(function () {
+          ok();
+        });
+    });
+
+  });
+
 })

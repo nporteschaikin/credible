@@ -34,6 +34,7 @@
       integer: /^\-?[0-9]+$/,
       natural: /^[0-9]+$/i,
       naturalNonZero: /^[1-9][0-9]*$/i,
+      luhn: /^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\d{3})\d{11})$/,
       url: /^((http|https):\/\/(\w+:{0,1}\w*@)?(\S+)|)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?$/
     },
 
@@ -41,6 +42,10 @@
 
       array: function (obj, prop) {
         if (!(obj[prop] instanceof Array)) throw new ValidatorMessage('array', {property: prop});
+      },
+
+      contains: function (obj, prop, value) {
+        if (obj[prop].indexOf(value) < 0) throw new ValidatorMessage('contains', {property: prop, value: value});
       },
 
       date: function (obj, prop) {
@@ -57,6 +62,22 @@
 
       fn: function (obj, prop) {
         if (!('function' === typeof obj[prop])) throw new ValidatorMessage('fn', {property: prop});
+      },
+
+      in: function (obj, prop, array) {
+        var isIn = false;
+        for (var key in array) {
+          if (array[key] === obj[prop]) isIn = true;
+        }
+        if (!isIn) throw new ValidatorMessage('in', {property: prop, arrayString: array.toString()});
+      },
+
+      json: function (obj, prop) {
+        try {
+          JSON.parse(obj[prop]);
+        } catch (e) {
+          throw new ValidatorMessage('json', {property: prop});
+        }
       },
 
       length: function (obj, prop, options) {
@@ -80,6 +101,14 @@
           if (!arr[key][1]) errs.push(new ValidatorMessage(arr[key][2], { property: prop, num: arr[key][0] }))
         }
         if (errs.length) throw errs;
+      },
+
+      lowercase: function (obj, prop) {
+        if (obj[prop].toLowerCase() !== obj[prop]) throw new ValidatorMessage('lowercase', { property: prop });
+      },
+
+      matches: function (obj, prop, regexp) {
+        if (!regexp.test(obj[prop])) throw new ValidatorMessage('matches', { property: prop, regexp: regexp });
       },
 
       NaN: function (obj, prop) {
@@ -132,6 +161,10 @@
 
       string: function (obj, prop) {
         if (!('string' === typeof obj[prop])) throw new ValidatorMessage('string', {property: prop});
+      },
+
+      uppercase: function (obj, prop) {
+        if (obj[prop].toUpperCase() !== obj[prop]) throw new ValidatorMessage('uppercase', { property: prop });
       }
 
     },
@@ -168,6 +201,9 @@
       boolean: {
         en: '{{property}} must be a boolean'
       },
+      contains: {
+        en: '{{property}} must contain \'{{value}}\''
+      },
       date: {
         en: '{{property}} must be a date'
       },
@@ -189,8 +225,14 @@
       greaterThanOrEqualTo: {
         en: '{{lh}} must be greater than or equal to {{rh}}'
       },
+      in: {
+        en: '{{property}} must be in {{arrayString}}'
+      },
       integer: {
         en: '{{property}} must be a valid integer'
+      },
+      json: {
+        en: '{{property}} must be valid JSON'
       },
       lengthEqualTo: {
         en: '{{property}} must have {{num}} character(s)'
@@ -212,6 +254,15 @@
       },
       lessThanOrEqualTo: {
         en: '{{lh}} must be less than or equal to {{rh}}'
+      },
+      lowercase: {
+        en: '{{property}} must be lowercase'
+      },
+      luhn: {
+        en: '{{property}} must be a valid credit card number'
+      },
+      matches: {
+        en: '{{property}} must match the following regular expression: {{regexp}}'
       },
       NaN: {
         en: '{{property}} must not be a number'
@@ -236,6 +287,9 @@
       },
       string: {
         en: '{{property}} must be a string'
+      },
+      uppercase: {
+        en: '{{property}} must be uppercase'
       },
       url: {
         en: '{{property}} must be a valid URL'
