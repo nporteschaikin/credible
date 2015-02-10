@@ -779,4 +779,24 @@ describe('validators', function () {
 
   });
 
+  describe('luhn', function () {
+
+    it('should test that a property is a valid credit card number', function (ok) {
+      var credible = new Credible()
+      credible
+        .rule('cc', 'luhn')
+        .run({cc: '2143'})
+        .catch(function (e) {
+          should(e.toString()).equal('cc must be a valid credit card number');
+        })
+        .then(function () {
+          return credible.run({cc: '4444444444444444'});
+        })
+        .then(function () {
+          ok();
+        });
+    });
+
+  });
+
 })
