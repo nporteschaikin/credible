@@ -201,7 +201,11 @@ Property must be an array.
 
 #### `boolean`
 
-Property must be a boolean (`true` or `false` onlyq).
+Property must be a boolean (`true` or `false` only).
+
+#### `contains`
+
+Property must contain the string specified in the second argument.
 
 #### `date`
 
@@ -232,6 +236,10 @@ credible
 
 Property must be an integer.
 
+#### `json`
+
+Property must be a valid JSON string.
+
 #### `length`
 
 Property must have a length matching specifications set in `options`.
@@ -245,6 +253,18 @@ Property must have a length matching specifications set in `options`.
 | `greaterThanOrEqualTo: number` | Property must have a length greater than or equal to `number` |
 | `lessThanOrEqualTo: number` | Property must have a length less than or equal to `number` |
 | `equalTo: number` | Property must have a length equal to `number` |
+
+#### `lowercase`
+
+Property must contain all lowercase letters.
+
+#### `luhn`
+
+Property must be a valid credit card number.
+
+#### `matches`
+
+Property must match `RegExp` object specified in second argument.
 
 #### `natural`
 
@@ -291,6 +311,10 @@ Property must be a regular expression (`RegExp` object).
 #### `string`
 
 Property must be a string.
+
+#### `uppercase`
+
+Property must contain all uppercase letters.
 
 #### `url`
 
